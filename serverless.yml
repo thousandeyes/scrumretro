@@ -75,18 +75,19 @@ package:
     - .settings/**
     - node_modules/@types/**
 
+environment:
+  DYNAMODB_TB_ROOMS: ${self:custom.dynamoDb.roomsTable.name}
+  # DYNAMODB_TB_ROOMS_IDX_PERSISTENT_ID: ${self:custom.dynamoDb.roomsTable.persistentIdIndex}
+  # DYNAMODB_TB_ROOMS_IDX_CONNECTION_ID: ${self:custom.dynamoDb.roomsTable.connectionIdIndex}
+  DYNAMODB_TB_COLUMNS: ${self:custom.dynamoDb.columnsTable.name}
+  DYNAMODB_TB_POSTS: ${self:custom.dynamoDb.postsTable.name}
+  DYNAMODB_TB_PARTICIPANTS: ${self:custom.dynamoDb.participantsTable.name}
 functions:
-  # onmessage:
-  #   handler: ./dist/handler.websocketMessageHandler
-  #   environment:
-  #     DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
-  #     DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
-  #     DYNAMODB_ROOM_PLAYERS_TABLE: ${self:custom.dynamoDbRoomPlayersTable}
-  #     DYNAMODB_ROOMS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomsTableConnectionIdIndex}
-  #     DYNAMODB_ROOM_PLAYERS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomPlayersTableConnectionIdIndex}
-  #   events:
-  #     - websocket:
-  #         route: $default
+  onmessage:
+    handler: ./dist/handler.websocketMessageHandler
+    events:
+      - websocket:
+          route: $default
   # disconnect:
   #   handler: ./dist/handler.websocketDisconnectedHandler
   #   environment:
