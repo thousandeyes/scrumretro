@@ -22,10 +22,10 @@ export default async function (event: APIGatewayProxyEvent): Promise<APIGatewayP
     switch(message.type) {
         case MessageType.PARTICIPANT_LOGIN:
             if (typeof message.persistentId !== undefined) {
-                const participantId = await createParticipantId();
+                const persistentId = await createPersistentId();
                 respondToWebsocket(client, event, {
                     type: MessageType.PERSISTENT_ID_GENERATED,
-                    participantId
+                    persistentId
                 });
             }
 
@@ -54,7 +54,7 @@ async function joinRoom(client: ApiGatewayManagementApi, playerName: string, pla
     }
 }
 
-async function createParticipantId(): Promise<string> {
+async function createPersistentId(): Promise<string> {
     return uuidv4();
 }
 
