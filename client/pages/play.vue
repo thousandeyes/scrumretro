@@ -1,14 +1,18 @@
 <template>
   <div class="player-view">
-    <p>Connected: {{connected}}</p>
-    <p>Persistent ID: {{persistentId}}</p>
+    <p>Connected: {{ connected }}</p>
+    <p>
+      Persistent ID: {{ persistentId }} -
+      <button type="button" :disabled="roomName" @click="deletePersistentId">
+        ❌ Delete
+      </button>
+    </p>
     <div v-if="roomName != null" class="play">
       <ViewColumns :columns="columns" />
     </div>
     <div v-else class="room-login-view">
       <h1>🃏 join room</h1>
       <div v-if="alertMsg" class="alert">{{ alertMsg }}</div>
-      <div v-if="persistentId" class="alert">Please re-enter the room name to log back in</div>
       <fieldset>
         <label for="roomNameInput">Room Code</label>
         <input
@@ -45,7 +49,12 @@
 import Vue from "vue";
 import Column from "../models/Column";
 import ViewColumns from "../components/ViewColumns.vue";
-import { MessageType, ParticipantLoginMessage, RoomJoinedMessage, ServerMessage } from "../../messages";
+import {
+  MessageType,
+  ParticipantLoginMessage,
+  RoomJoinedMessage,
+  ServerMessage,
+} from "../../messages";
 
 const PERSISTENT_ID_KEY = "participant/persistentId";
 
@@ -130,39 +139,44 @@ export default Vue.extend({
       };
       this.socket.send(JSON.stringify(message));
     },
+    deletePersistentId() {
+      const localStorageKey = `${this.$config.stage}/${PERSISTENT_ID_KEY}`;
+      delete window.localStorage[localStorageKey];
+      window.location.reload();
+    },
   },
 });
 </script>
 
 <style scoped>
 .room-login-view {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
 }
 .alert {
-    color: #cc0808;
-    border: 1px solid #cc0808;
-    padding: 15px 10px;
+  color: #cc0808;
+  border: 1px solid #cc0808;
+  padding: 15px 10px;
 }
 .room-login-view > fieldset {
-    border: none;
-    min-height: 48px;
-    padding: 10px 0;
+  border: none;
+  min-height: 48px;
+  padding: 10px 0;
 }
 .room-login-view > fieldset + fieldset {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 .room-login-view > fieldset > input {
-    display: block;
-    font-size: 20px;
-    width: 100%;
-    margin-top: 5px;
+  display: block;
+  font-size: 20px;
+  width: 100%;
+  margin-top: 5px;
 }
 .join-button {
-    margin-top: 10px;
-    height: 48px;
+  margin-top: 10px;
+  height: 48px;
 }
 </style>
