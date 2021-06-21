@@ -71,10 +71,16 @@ export default Vue.extend({
         case MessageType.PERSISTENT_ID_GENERATED:
           this.savePersistentId(message.persistentId);
           break;
-        case MessageType.ROOM_JOINED:
+        case MessageType.ROOM_JOINED: {
           const { roomName, columns } = message;
           Object.assign(this.room, { roomName, columns });
           break;
+        }
+        case MessageType.COLUMNS_UPDATED: {
+          const { columns } = message;
+          Object.assign(this.room, { columns });
+          break;
+        }
         case MessageType.CONFLUENCE_NOTES_SYNCED:
           const { response, confluencePageUrl } = message;
           Object.assign(this.syncNotesState, { response, confluencePageUrl });
@@ -83,8 +89,6 @@ export default Vue.extend({
           console.warn("Unknown message received", { ...message });
           break;
       }
-
-      console.log(message, this.room);
     },
     savePersistentId(persistentId: string) {
       const localStorageKey = `${this.$config.stage}/${PERSISTENT_ID_KEY}`;
@@ -92,15 +96,12 @@ export default Vue.extend({
       this.room.persistentId = persistentId;
     },
     onNewColumn() {
-      const id = `Column ${randomId()}`;
-      this.room.columns.push({
-        columnId: id,
-        columnName: id,
-        isOpen: false,
-        posts: [],
-      });
-
-      // TODO: add in socket
+      this.socket.send(
+        JSON.stringify({
+          type: MessageType.SCRUM_MASTER_ADD_COLUMN,
+          persistentId: this.room.persistentId,
+        })
+      );
     },
     onSyncNotes() {
       this.socket.send(
@@ -122,10 +123,6 @@ interface State {
     message: string;
     confluencePageUrl?: string;
   };
-}
-
-function randomId() {
-  return Math.floor(Math.random() * 10000000000);
 }
 </script>
 
