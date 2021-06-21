@@ -4,6 +4,8 @@ export enum MessageType {
     PARTICIPANT_LOGIN = 'PARTICIPANT_LOGIN',
     PARTICIPANT_JOINED = 'PARTICIPANT_JOINED',
     SCRUM_MASTER_LOGIN = 'SCRUM_MASTER_LOGIN',
+    CONFLUENCE_NOTES_SYNC = 'CONFLUENCE_NOTES_SYNC',
+    CONFLUENCE_NOTES_SYNCED = 'CONFLUENCE_NOTES_SYNCED',
     PERSISTENT_ID_GENERATED = 'PERSISTENT_ID_GENERATED',
     ROOM_JOINED = 'ROOM_JOINED',
     ACTION_FAILED = 'ACTION_FAILED',
@@ -11,13 +13,15 @@ export enum MessageType {
 
 export type ClientMessage =
     | ScrumMasterLoginMessage
-    | ParticipantLoginMessage;
+    | ParticipantLoginMessage
+    | ConfluenceNotesSyncMessage;
 
 export type ServerMessage =
     | PersistentIdGeneratedMessage
     | RoomJoinedMessage
     | ActionFailedMessage
-    | InternalError;
+    | InternalError
+    | ConfluenceNotesSyncedMessage;
 
 export interface ScrumMasterLoginMessage {
     type: MessageType.SCRUM_MASTER_LOGIN;
@@ -58,4 +62,15 @@ export interface ActionFailedMessage {
 export interface InternalError {
     type: undefined;
     message: string;
+}
+
+export interface ConfluenceNotesSyncMessage {
+    type: MessageType.CONFLUENCE_NOTES_SYNC;
+    persistentId?: string;
+}
+
+export interface ConfluenceNotesSyncedMessage {
+    type: MessageType.CONFLUENCE_NOTES_SYNCED;
+    response: string;
+    confluencePageUrl?: string;
 }
