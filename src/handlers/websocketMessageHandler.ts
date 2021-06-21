@@ -16,7 +16,7 @@ import { findColumnsByRoomName, saveColumns } from "../db/columns";
 import DbColumn from "../models/Column";
 import ViewColumn from "../../client/models/Column";
 
-export default async function(
+export default async function (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
   const client = new ApiGatewayManagementApi({
@@ -53,6 +53,24 @@ export default async function(
       }
 
       await joinRoomAsScrumMaster(client, event, { ...message, persistentId });
+      return { statusCode: 200, body: "handled" };
+    }
+    case MessageType.CONFLUENCE_NOTES_SYNC: {
+      let { persistentId } = message;
+      if (persistentId == null) {
+        respondToWebsocket(client, event, {
+          type: MessageType.CONFLUENCE_NOTES_SYNCED,
+          response: 'Unknown room to sync notes from'
+        });
+        return { statusCode: 200, body: "handled" };
+      }
+
+      const pageUrl = await syncConfluenceNotes(client, persistentId);
+      respondToWebsocket(client, event, {
+        type: MessageType.CONFLUENCE_NOTES_SYNCED,
+        response: pageUrl ? 'OK' : 'Failed to sync notes',
+        confluencePageUrl: pageUrl
+      });
       return { statusCode: 200, body: "handled" };
     }
     default:
@@ -105,10 +123,10 @@ async function joinRoom(
   await client.postToConnection({
     ConnectionId: room.connection_id,
     Data: JSON.stringify({
-        type: MessageType.PARTICIPANT_JOINED,
-        roomName: wsMessage.roomName,
-        participantName: wsMessage.participantName,
-        persistentId: wsMessage.persistentId
+      type: MessageType.PARTICIPANT_JOINED,
+      roomName: wsMessage.roomName,
+      participantName: wsMessage.participantName,
+      persistentId: wsMessage.persistentId
     }),
   }).promise();
 }
@@ -181,4 +199,13 @@ async function respondToWebsocket<M extends ServerMessage>(
       e
     );
   }
+}
+
+async function syncConfluenceNotes(client: ApiGatewayManagementApi, persistentId: string): Promise<string> {
+  const room = await findRoomByPersistentId(persistentId);
+  if (!room) {
+    return Promise.reject();
+  }
+
+  return "https://confluence.com;"
 }

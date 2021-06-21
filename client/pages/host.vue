@@ -2,6 +2,7 @@
   <div>
     <RoomDetails :persistentIdKey="persistentIdKey" :room="room" />
     <ViewColumns :columns="room.columns" :adminMode="true" :onNewColumn="onNewColumn" />
+    <SyncNotes :persistentIdKey="persistentIdKey" :onSync="onSyncNotes" :state="syncNotesState" />
   </div>
 </template>
 
@@ -10,13 +11,14 @@ import Vue from "vue";
 import { MessageType, ServerMessage } from "../../messages";
 import ViewColumns from '../components/ViewColumns.vue';
 import RoomDetails from '../components/RoomDetails.vue';
+import SyncNotes from '../components/SyncNotes.vue';
 import Room from '../models/Room';
 
 
 const PERSISTENT_ID_KEY = "persistentId";
 
 export default Vue.extend({
-  components: { RoomDetails, ViewColumns },
+  components: { RoomDetails, ViewColumns, SyncNotes },
   data(): State {
     return {
       persistentIdKey: PERSISTENT_ID_KEY,
@@ -27,6 +29,10 @@ export default Vue.extend({
         columns: [],
         participants: [],
       },
+      syncNotesState: {
+        message: '',
+        confluencePageUrl: ''
+      }
     }
   },
   mounted() {
@@ -62,6 +68,10 @@ export default Vue.extend({
           const { roomName, columns } = message;
           Object.assign(this.room, { roomName, columns });
           break;
+        case MessageType.CONFLUENCE_NOTES_SYNCED:
+          const { response, confluencePageUrl } = message;
+          Object.assign(this.syncNotesState, { response, confluencePageUrl });
+          break;
         default:
           console.warn('Unknown message received', {...message});
           break;
@@ -84,6 +94,17 @@ export default Vue.extend({
       });
 
       // TODO: add in socket
+    },
+    onSyncNotes() {
+
+      this.socket.send(
+        JSON.stringify({
+          type: MessageType.CONFLUENCE_NOTES_SYNC,
+          persistentId: this.room.persistentId,
+        })
+      );
+
+      // TODO: Update UI
     },
   },
 });
