@@ -12,32 +12,43 @@ provider:
   runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
   region: eu-west-2
-  # iamRoleStatements:
-  #   - Effect: Allow
-  #     Action:
-  #       - dynamodb:Query
-  #       - dynamodb:Scan
-  #       - dynamodb:GetItem
-  #       - dynamodb:PutItem
-  #       - dynamodb:UpdateItem
-  #       - dynamodb:DeleteItem
-  #     Resource:
-  #       - !GetAtt DynamoDBVotesTable.Arn
-  #       - !Join ['/', [!GetAtt DynamoDBVotesTable.Arn, 'index', '*' ] ]
-  #       - !GetAtt DynamoDBRoomPlayersTable.Arn
-  #       - !Join ['/', [!GetAtt DynamoDBRoomPlayersTable.Arn, 'index', '*' ] ]
-  #       - !GetAtt DynamoDBRoomsTable.Arn
-  #      - !Join ['/', [!GetAtt DynamoDBRoomsTable.Arn, 'index', '*' ] ]
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - !GetAtt DynamoDbRoomsTable.Arn
+        - !Join ['/', [!GetAtt DynamoDbRoomsTable.Arn, 'index', '*' ] ]
+        - !GetAtt DynamoDbColumnsTable.Arn
+        - !Join ['/', [!GetAtt DynamoDbColumnsTable.Arn, 'index', '*' ] ]
+        - !GetAtt DynamoDbPostsTable.Arn
+        - !Join ['/', [!GetAtt DynamoDbPostsTable.Arn, 'index', '*' ] ]
+        - !GetAtt DynamoDbParticipantsTable.Arn
+        - !Join ['/', [!GetAtt DynamoDbParticipantsTable.Arn, 'index', '*' ] ]
   logs:
     websocket: true
 
 custom:
   secrets: ${file(.settings/secrets.json)}
-  # dynamoDbVotesTable: ${self:service}-${self:provider.stage}-tb_votes
-  # dynamoDbRoomsTable: ${self:service}-${self:provider.stage}-tb_rooms
-  # dynamoDbRoomsTableConnectionIdIndex: ${self:custom.dynamoDbRoomsTable}-idx_connection_id
-  # dynamoDbRoomPlayersTable: ${self:service}-${self:provider.stage}-tb_room_players
-  # dynamoDbRoomPlayersTableConnectionIdIndex: ${self:custom.dynamoDbRoomPlayersTable}-idx_connection_id
+  dynamoDb:
+    roomsTable:
+      name: ${self:service}-${self:provider.stage}-tb_rooms
+      persistentIdIndex: ${self:custom.dynamoDb.roomsTable.name}-idx_persistent_id
+      connectionIdIndex: ${self:custom.dynamoDb.roomsTable.name}-idx_connection_id
+    columnsTable:
+      name: ${self:service}-${self:provider.stage}-tb_columns
+      columnIdIndex: ${self:custom.dynamoDb.columnsTable.name}-idx_column_id
+    postsTable:
+      name: ${self:service}-${self:provider.stage}-tb_posts
+    participantsTable:
+      name: ${self:service}-${self:provider.stage}-tb_participants
+      roomNameIndex: ${self:custom.dynamoDb.participantsTable.name}-idx_room_name
+      connectionIdIndex: ${self:custom.dynamoDb.participantsTable.name}-idx_connection_id
   buckets:
     ASSETS_BUCKET_NAME: ${self:service}-${self:provider.stage}-assets
   s3Sync:
@@ -145,3 +156,89 @@ resources:
               Principal: '*'
             },
           ]
+    DynamoDbRoomsTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        TableName: ${self:custom.dynamoDb.roomsTable.name}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: room_name
+            AttributeType: S
+          - AttributeName: persistent_id
+            AttributeType: S
+          - AttributeName: connection_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: room_name
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:custom.dynamoDb.roomsTable.persistentIdIndex}
+            Projection: { ProjectionType: ALL }
+            KeySchema:
+              - AttributeName: persistent_id
+                KeyType: HASH
+          - IndexName: ${self:custom.dynamoDb.roomsTable.connectionIdIndex}
+            Projection: { ProjectionType: ALL }
+            KeySchema:
+              - AttributeName: connection_id
+                KeyType: HASH
+    DynamoDbColumnsTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        TableName: ${self:custom.dynamoDb.columnsTable.name}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: room_name
+            AttributeType: S
+          - AttributeName: column_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: room_name
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:custom.dynamoDb.columnsTable.columnIdIndex}
+            Projection: { ProjectionType: ALL }
+            KeySchema:
+              - AttributeName: column_id
+                KeyType: HASH
+    DynamoDbPostsTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        TableName: ${self:custom.dynamoDb.postsTable.name}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: column_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: column_id
+            KeyType: HASH
+    DynamoDbParticipantsTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        TableName: ${self:custom.dynamoDb.participantsTable.name}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: persistent_id
+            AttributeType: S
+          - AttributeName: room_name
+            AttributeType: S
+          - AttributeName: connection_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: persistent_id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:custom.dynamoDb.participantsTable.roomNameIndex}
+            Projection: { ProjectionType: ALL }
+            KeySchema:
+              - AttributeName: room_name
+                KeyType: HASH
+          - IndexName: ${self:custom.dynamoDb.participantsTable.connectionIdIndex}
+            Projection: { ProjectionType: ALL }
+            KeySchema:
+              - AttributeName: connection_id
+                KeyType: HASH
