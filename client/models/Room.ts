@@ -2,10 +2,10 @@ import Column from './Column';
 import Participant from './Participant';
 
 export default interface Room {
+    connected: boolean;
     persistentId?: string;
     roomName?: string;
-    createDate?: boolean;
     columns: Column[];
+    createDate?: boolean;
     participants: Participant[];
-    connected: boolean;
 }
