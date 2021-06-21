@@ -1,6 +1,11 @@
 <template>
   <div class="view-columns">
-    <Column v-for="column in columns" :key="column.columnId" :column="column" :readOnly="readOnly" />
+    <Column v-for="column in columns" :key="column.columnId" :column="column" :adminMode="adminMode" />
+    <div v-if="adminMode">
+      <div class="manage-columns-btns">
+        <button @click="onNewColumn">➕</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -13,16 +18,30 @@ export default Vue.extend({
   components: { Column: ColumnComponent, },
   props: {
     columns: { type: Array as PropType<Column[]> },
-    readOnly: { type: Boolean, default: false },
+    adminMode: { type: Boolean, default: false },
+    onNewColumn: { type: Function as PropType<() => void>, default: () => {} },
   },
 });
 </script>
 
 <style scoped>
 .view-columns {
+  overflow: auto;
   height: calc(100vh - 50px);
   display: flex;
   justify-content: center;
   align-items: stretch;
+}
+
+.manage-columns-btns {
+  padding: 10px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  margin-block-start: 0.83em;
+  font-size: 1.5em;
 }
 </style>

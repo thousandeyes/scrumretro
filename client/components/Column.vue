@@ -1,8 +1,8 @@
 <template>
   <div class="column">
-    <h2> {{ column.columnName }} </h2>
+    <ColumnHeader :column="column" />
     <div class="column-container">
-      <div v-if="!readOnly && column.isOpen" class="post-input column-item">
+      <div v-if="!adminMode && column.isOpen" class="post-input column-item">
         <InputPost :onPost="onPost" />
       </div>
       <div class="post-display"> 
@@ -18,16 +18,17 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import InputPost from './InputPost.vue';
-import Column from '../models/Column';
 import ViewPost from './ViewPost.vue';
+import ColumnHeader from './ColumnHeader.vue';
+import Column from '../models/Column';
 import Post from '../models/Post';
 
 
 export default Vue.extend({
-  components: { InputPost, ViewPost },
+  components: { ColumnHeader, InputPost, ViewPost },
   props: {
-    column: { type: Object as PropType<Column> },
-    readOnly: { type: Boolean, default: false },
+    column: { type: Object as PropType<Column>, required: true },
+    adminMode: { type: Boolean, default: true },
   },
   computed: {
     noPosts() {
@@ -39,7 +40,7 @@ export default Vue.extend({
       // TODO: send post to server
       // TEMP post creation
       const post: Post = {
-        postId: `POST: ${this.randomId()}`,
+        postId: `POST: ${randomId()}`,
         text: text,
         participant: {
           persistentId: "THIS ID!",
@@ -49,11 +50,12 @@ export default Vue.extend({
       };
       this.column.posts.unshift(post);
     },
-    randomId() {
-      return Math.floor(Math.random() * 100000);
-    }
   }
 });
+
+function randomId() {
+  return Math.floor(Math.random() * 10000000000);
+}
 </script>
 
 

@@ -61,17 +61,11 @@ const PERSISTENT_ID_KEY = "participant/persistentId";
 export default Vue.extend({
   components: { ViewColumns },
   data() {
-    const columns: Column[] = [
-      {
-        columnId: "ID 1",
-        columnName: "Column 1",
-        isOpen: false,
-        posts: [],
-      },
-      {
-        columnId: "ID 2",
-        columnName: "Column 2",
-        isOpen: false,
+    const id = `Column ${randomId()}`;
+    const columns: Column[] = [{
+        columnId: id,
+        columnName: id,
+        isOpen: true,
         posts: [],
       },
     ];
@@ -146,6 +140,10 @@ export default Vue.extend({
     },
   },
 });
+
+function randomId() {
+  return Math.floor(Math.random() * 10000000000);
+}
 </script>
 
 <style scoped>

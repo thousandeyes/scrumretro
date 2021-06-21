@@ -1,7 +1,7 @@
 <template>
   <div>
     <RoomDetails :room="room" />
-    <ViewColumns :columns="room.columns" />
+    <ViewColumns :columns="room.columns" :adminMode="true" :onNewColumn="onNewColumn" />
   </div>
 </template>
 
@@ -18,25 +18,15 @@ const PERSISTENT_ID_KEY = "persistentId";
 export default Vue.extend({
   components: { RoomDetails, ViewColumns },
   data(): { room: Room } {
+    const id1 = `Column ${randomId()}`;
+
     return {
       room: {
         columns: [
           {
-            columnId: 'ID 1',
-            columnName: 'Column 1',
+            columnId: id1,
+            columnName: id1,
             isOpen: true,
-            posts: [],
-          },
-          {
-            columnId: 'ID 2',
-            columnName: 'Column 2',
-            isOpen: false,
-            posts: [],
-          },
-          {
-            columnId: 'ID 3',
-            columnName: 'Column 3',
-            isOpen: false,
             posts: [],
           }
         ],
@@ -89,8 +79,21 @@ export default Vue.extend({
       window.localStorage[localStorageKey] = persistentId;
       this.room.persistentId = persistentId;
     },
+    onNewColumn() {
+      const id = `Column ${randomId()}`;
+      this.room.columns.push({
+        columnId: id,
+        columnName: id,
+        isOpen: false,
+        posts: [],
+      });
+    },
   },
 });
+
+function randomId() {
+  return Math.floor(Math.random() * 10000000000);
+}
 </script>
 
 <style scoped>
