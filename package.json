@@ -1,0 +1,54 @@
+{
+  "name": "scrumretro",
+  "version": "1.0.0",
+  "description": "Scrum retro hackday project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build:client && npm run build:server",
+    "build:server": "webpack -c ./src/webpack.config.js --progress",
+    "dev:client": "nuxt -c ./nuxt.config.ts",
+    "build:client": "nuxt build -c ./nuxt.config.ts",
+    "start:client": "nuxt start -c ./nuxt.config.ts",
+    "generate:client": "nuxt generate -c ./nuxt.config.ts",
+    "deploy": "cross-env NODE_ENV=development LAMBDA_ENV=dev npm run build && sls deploy",
+    "deploy.prod": "cross-env NODE_ENV=production LAMBDA_ENV=prod npm run build && sls deploy --stage prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thousandeyes/scrumretro.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thousandeyes/scrumretro/issues"
+  },
+  "homepage": "https://github.com/thousandeyes/scrumretro#readme",
+  "dependencies": {
+    "@nuxt/http": "^0.1.2",
+    "axios": "^0.21.1",
+    "lodash": "^4.17.20",
+    "nuxt": "^2.14.12",
+    "nuxt-start": "^2.14.12",
+    "serverless-http": "^2.6.0",
+    "uuid-random": "^1.3.2",
+    "vue-server-renderer": "^2.6.12"
+  },
+  "devDependencies": {
+    "@nuxt/types": "^2.14.12",
+    "@nuxt/typescript-build": "^2.0.4",
+    "@types/aws-lambda": "^8.10.64",
+    "@types/aws-sdk": "^2.7.0",
+    "@types/lodash": "^4.14.165",
+    "cross-env": "^7.0.3",
+    "serverless-apigw-binary": "git+https://github.com/FLamparski/serverless-apigw-binary.git",
+    "serverless-domain-manager": "^5.1.0",
+    "serverless-plugin-common-excludes": "^3.0.1",
+    "serverless-plugin-include-dependencies": "^4.1.0",
+    "serverless-s3-sync": "^1.15.0",
+    "ts-loader": "^8.0.14",
+    "typescript": "^4.1.2",
+    "webpack": "^4.44.0",
+    "webpack-cli": "^4.4.0"
+  }
+}

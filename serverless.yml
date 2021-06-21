@@ -1,0 +1,147 @@
+service: hackday-scrum-retro
+frameworkVersion: '2'
+
+plugins:
+  - serverless-s3-sync
+  - serverless-domain-manager
+  - serverless-apigw-binary
+  - serverless-plugin-common-excludes
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-2
+  # iamRoleStatements:
+  #   - Effect: Allow
+  #     Action:
+  #       - dynamodb:Query
+  #       - dynamodb:Scan
+  #       - dynamodb:GetItem
+  #       - dynamodb:PutItem
+  #       - dynamodb:UpdateItem
+  #       - dynamodb:DeleteItem
+  #     Resource:
+  #       - !GetAtt DynamoDBVotesTable.Arn
+  #       - !Join ['/', [!GetAtt DynamoDBVotesTable.Arn, 'index', '*' ] ]
+  #       - !GetAtt DynamoDBRoomPlayersTable.Arn
+  #       - !Join ['/', [!GetAtt DynamoDBRoomPlayersTable.Arn, 'index', '*' ] ]
+  #       - !GetAtt DynamoDBRoomsTable.Arn
+  #      - !Join ['/', [!GetAtt DynamoDBRoomsTable.Arn, 'index', '*' ] ]
+  logs:
+    websocket: true
+
+custom:
+  secrets: ${file(.settings/secrets.json)}
+  # dynamoDbVotesTable: ${self:service}-${self:provider.stage}-tb_votes
+  # dynamoDbRoomsTable: ${self:service}-${self:provider.stage}-tb_rooms
+  # dynamoDbRoomsTableConnectionIdIndex: ${self:custom.dynamoDbRoomsTable}-idx_connection_id
+  # dynamoDbRoomPlayersTable: ${self:service}-${self:provider.stage}-tb_room_players
+  # dynamoDbRoomPlayersTableConnectionIdIndex: ${self:custom.dynamoDbRoomPlayersTable}-idx_connection_id
+  buckets:
+    ASSETS_BUCKET_NAME: ${self:service}-${self:provider.stage}-assets
+  s3Sync:
+    - bucketName: ${self:custom.buckets.ASSETS_BUCKET_NAME}
+      localDir: .nuxt/dist/client
+  customDomain:
+    domainName: ${self:custom.secrets.domainName.${self:provider.stage}}
+    basePath: ''
+    endpointType: regional
+    certificateName: 'scrumretro.lol'
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+  apigwBinary:
+    types:
+      - '*/*'
+
+package:
+  excludeDevDependencies: true
+  include:
+    - dist/handler.js
+    - .nuxt/**
+  exclude:
+    - .git/**
+    - .settings/**
+    - node_modules/@types/**
+
+functions:
+  # onmessage:
+  #   handler: ./dist/handler.websocketMessageHandler
+  #   environment:
+  #     DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
+  #     DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
+  #     DYNAMODB_ROOM_PLAYERS_TABLE: ${self:custom.dynamoDbRoomPlayersTable}
+  #     DYNAMODB_ROOMS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomsTableConnectionIdIndex}
+  #     DYNAMODB_ROOM_PLAYERS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomPlayersTableConnectionIdIndex}
+  #   events:
+  #     - websocket:
+  #         route: $default
+  # disconnect:
+  #   handler: ./dist/handler.websocketDisconnectedHandler
+  #   environment:
+  #     DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
+  #     DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
+  #     DYNAMODB_ROOM_PLAYERS_TABLE: ${self:custom.dynamoDbRoomPlayersTable}
+  #     DYNAMODB_ROOMS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomsTableConnectionIdIndex}
+  #     DYNAMODB_ROOM_PLAYERS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomPlayersTableConnectionIdIndex}
+  #   events:
+  #     - websocket:
+  #         route: $disconnect
+
+  nuxt:
+    handler: ./dist/handler.nuxtHandler
+    environment:
+      LAMBDA_ENV: ${self:provider.stage}
+    events:
+      - http: ANY /
+      - http: ANY /{proxy+}
+      - http:
+          path: /_nuxt/{proxy+}
+          method: ANY
+          integration: http-proxy
+          request:
+            uri: https://${self:custom.buckets.ASSETS_BUCKET_NAME}.s3.${self:provider.region}.amazonaws.com/{proxy}
+            parameters:
+              paths:
+                proxy: true
+
+resources:
+  Resources:
+    ClientAssetsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.buckets.ASSETS_BUCKET_NAME}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - HEAD
+                - PUT
+                - POST
+                - DELETE
+              MaxAge: 3000
+              ExposedHeaders:
+                - x-amz-server-side-encryption
+                - x-amz-request-id
+                - x-amz-id-2
+    ClientAssetsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: ClientAssetsBucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement: [
+            {
+              Action: ['s3:GetObject'],
+              Effect: 'Allow',
+              Resource: {
+                Fn::Join: ['', ['arn:aws:s3:::', { Ref: 'ClientAssetsBucket' }, '/*']],
+              },
+              Principal: '*'
+            },
+          ]
