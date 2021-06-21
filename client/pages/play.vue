@@ -7,7 +7,7 @@
     </div>
     <div v-else class="room-login-view">
       <h1>🃏 join room</h1>
-      <!-- <div v-if="alertMsg" class="alert">{{ alertMsg }}</div> -->
+      <div v-if="alertMsg" class="alert">{{ alertMsg }}</div>
       <div v-if="persistentId" class="alert">Please re-enter the room name to log back in</div>
       <fieldset>
         <label for="roomNameInput">Room Code</label>
@@ -45,7 +45,7 @@
 import Vue from "vue";
 import Column from "../models/Column";
 import ViewColumns from "../components/ViewColumns.vue";
-import { MessageType, ParticipantLoginMessage, ServerMessage } from "../../messages";
+import { MessageType, ParticipantLoginMessage, RoomJoinedMessage, ServerMessage } from "../../messages";
 
 const PERSISTENT_ID_KEY = "participant/persistentId";
 
@@ -73,6 +73,7 @@ export default Vue.extend({
       playerNameInputValue: "",
       roomNameInputValue: "",
       persistentId: undefined,
+      alertMsg: undefined,
     };
   },
   computed: {
@@ -103,12 +104,22 @@ export default Vue.extend({
         case MessageType.PERSISTENT_ID_GENERATED:
           this.savePersistentId(message.persistentId);
           break;
+        case MessageType.ROOM_JOINED:
+          this.roomJoined(message);
+          break;
+        case MessageType.ACTION_FAILED:
+          this.alertMsg = message.details;
+          break;
       }
     },
     savePersistentId(persistentId: string) {
       const localStorageKey = `${this.$config.stage}/${PERSISTENT_ID_KEY}`;
       window.localStorage[localStorageKey] = persistentId;
       this.persistentId = persistentId;
+    },
+    roomJoined(message: RoomJoinedMessage) {
+      this.roomName = message.roomName;
+      this.columns = message.columns;
     },
     onJoinRoomClick() {
       const message: ParticipantLoginMessage = {
