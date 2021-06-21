@@ -16,7 +16,8 @@ export type ClientMessage =
 export type ServerMessage =
     | PersistentIdGeneratedMessage
     | RoomJoinedMessage
-    | ActionFailedMessage;
+    | ActionFailedMessage
+    | InternalError;
 
 export interface ScrumMasterLoginMessage {
     type: MessageType.SCRUM_MASTER_LOGIN;
@@ -52,4 +53,9 @@ export interface ActionFailedMessage {
     type: MessageType.ACTION_FAILED;
     request: ClientMessage;
     details: any;
+}
+
+export interface InternalError {
+    type: undefined;
+    message: string;
 }

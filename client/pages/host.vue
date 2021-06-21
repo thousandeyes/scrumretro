@@ -1,6 +1,6 @@
 <template>
   <div>
-    <RoomDetails :room="room" />
+    <RoomDetails :persistentIdKey="persistentIdKey" :room="room" />
     <ViewColumns :columns="room.columns" :adminMode="true" :onNewColumn="onNewColumn" />
   </div>
 </template>
@@ -17,24 +17,16 @@ const PERSISTENT_ID_KEY = "persistentId";
 
 export default Vue.extend({
   components: { RoomDetails, ViewColumns },
-  data(): { room: Room } {
-    const id1 = `Column ${randomId()}`;
-
+  data(): State {
     return {
+      persistentIdKey: PERSISTENT_ID_KEY,
       room: {
-        columns: [
-          {
-            columnId: id1,
-            columnName: id1,
-            isOpen: true,
-            posts: [],
-          }
-        ],
         connected: false,
-        roomName: undefined,
-        participants: [],
         persistentId: undefined,
-      }
+        roomName: undefined,
+        columns: [],
+        participants: [],
+      },
     }
   },
   mounted() {
@@ -67,12 +59,15 @@ export default Vue.extend({
           this.savePersistentId(message.persistentId);
           break;
         case MessageType.ROOM_JOINED:
-          this.room.roomName = message.roomName;
+          const { roomName, columns } = message;
+          Object.assign(this.room, { roomName, columns });
           break;
         default:
           console.warn('Unknown message received', {...message});
           break;
       }
+
+      console.log(message, this.room);
     },
     savePersistentId(persistentId: string) {
       const localStorageKey = `${this.$config.stage}/${PERSISTENT_ID_KEY}`;
@@ -87,9 +82,16 @@ export default Vue.extend({
         isOpen: false,
         posts: [],
       });
+
+      // TODO: add in socket
     },
   },
 });
+
+interface State {
+  persistentIdKey: string;
+  room: Room;
+}
 
 function randomId() {
   return Math.floor(Math.random() * 10000000000);
