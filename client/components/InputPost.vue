@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent="post" novalidate>
-    <textarea placeholder="What's on your mind" @input="valueChanged" :value="value" />
+    <textarea placeholder="What's on your mind?" @input="valueChanged" :value="value" />
     <div class="buttons">
       <div class="errors">
         <small> {{error}} </small>

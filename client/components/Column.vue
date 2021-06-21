@@ -2,15 +2,14 @@
   <div class="column">
     <h2> {{ column.columnName }} </h2>
     <div class="column-container">
+      <div v-if="!readOnly && column.isOpen" class="post-input column-item">
+        <InputPost :onPost="onPost" />
+      </div>
       <div class="post-display"> 
         <div class="column-item" v-for="post in column.posts" :key="post.postId"> 
           <ViewPost :post="post" />
         </div>
         <h3 class="no-posts" v-if="noPosts"> No posts </h3>
-      </div>
-
-      <div class="post-input column-item">
-        <InputPost :onPost="onPost" />
       </div>
     </div>
   </div>
@@ -27,7 +26,8 @@ import Post from '../models/Post';
 export default Vue.extend({
   components: { InputPost, ViewPost },
   props: {
-    column: { type: Object as PropType<Column> }
+    column: { type: Object as PropType<Column> },
+    readOnly: { type: Boolean, default: false },
   },
   computed: {
     noPosts() {
@@ -47,7 +47,7 @@ export default Vue.extend({
         },
         submittedDate: Date.now()/1000
       };
-      this.column.posts.push(post);
+      this.column.posts.unshift(post);
     },
     randomId() {
       return Math.floor(Math.random() * 100000);
@@ -59,17 +59,19 @@ export default Vue.extend({
 
 <style scoped>
 .column {
-  min-height: 200px;
-  width:  300px;
+  display: flex;
+  flex-flow: column nowrap;
+  width:  350px;
   padding: 10px;
 }
 
 .column-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   padding-top: calc(10px / 2);
-  border: 1px solid red;
+  height: 100%;
+  border-radius: 3px;
+  border: 1px solid grey;
+  overflow-y: auto;
+  overflow-y: auto;
 }
 
 .column-item {
@@ -78,6 +80,10 @@ export default Vue.extend({
 
 .post-input {
   height: 100px;
+}
+
+.post-display {
+  word-break: break-all;
 }
 
 .no-posts {

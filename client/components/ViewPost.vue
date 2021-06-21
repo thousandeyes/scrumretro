@@ -21,7 +21,12 @@ export default Vue.extend({
 <style scoped>
 
 .view-post {
-  border: 1px solid blue;
+  text-align: center;
+  color: #444;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+  background-color: #fafafa;
+  padding: 5px;
 }
 
 
