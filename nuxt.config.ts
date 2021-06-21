@@ -28,6 +28,7 @@ export default {
     ],
 
     publicRuntimeConfig: {
+        stage: process.env.LAMBDA_ENV || 'dev',
         websocketUrl: wsApi[process.env.LAMBDA_ENV || 'dev'],
     },
 };
