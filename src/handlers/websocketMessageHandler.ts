@@ -11,6 +11,10 @@ import {
 import { findRoomByName, findRoomByPersistentId, saveRoom } from "../db/rooms";
 import { findParticipantByRoomNameAndPersistentId, saveRoomParticipant } from "../db/participants";
 import { getRoomName } from "../utils/roomName";
+import { getDefaultColumns } from "../utils/defaultColumns";
+import { findColumnsByRoomName, saveColumns } from "../db/columns";
+import DbColumn from "../models/Column";
+import ViewColumn from "../../client/models/Column";
 
 export default async function(
   event: APIGatewayProxyEvent
@@ -49,13 +53,13 @@ export default async function(
       }
 
       await joinRoomAsScrumMaster(client, event, { ...message, persistentId });
-      return { statusCode: 200, body: 'handled' };
+      return { statusCode: 200, body: "handled" };
     }
     default:
       await respondToWebsocket(client, event, {
         type: MessageType.ACTION_FAILED,
         request: message,
-        details: 'Unknown message type'
+        details: "Unknown message type"
       });
       return { statusCode: 200, body: "handled" };
   }
@@ -70,9 +74,9 @@ async function joinRoom(
   const room = await findRoomByName(wsMessage.roomName);
   if (!room) {
     await respondToWebsocket(client, event, {
-        type: MessageType.ACTION_FAILED,
-        request: wsMessage,
-        details: `Cannot find room ${wsMessage.roomName}`,
+      type: MessageType.ACTION_FAILED,
+      request: wsMessage,
+      details: `Cannot find room ${wsMessage.roomName}`
     });
     return;
   }
@@ -114,30 +118,45 @@ async function joinRoomAsScrumMaster(
   event: APIGatewayProxyEvent,
   wsMessage: ScrumMasterLoginMessage & { persistentId: string }
 ): Promise<void> {
-  console.log('joining room as scrum master')
+  console.log("joining room as scrum master");
   let room = await findRoomByPersistentId(wsMessage.persistentId);
   if (room) {
-    console.log(`found room for supplied persistent id: ${room.room_name}`)
+    console.log(`found room for supplied persistent id: ${room.room_name}`);
+    const columns = await findColumnsByRoomName(room.room_name);
+
     await respondToWebsocket(client, event, {
       type: MessageType.ROOM_JOINED,
       roomName: room.room_name,
-      columns: [] // TODO fetch columns and return them here
+      columns: mapColumnsToView(columns)
     });
   } else {
-    console.log('creating new room (no persistent room found)')
+    console.log("creating new room (no persistent room found)");
     room = {
       room_name: getRoomName(),
       persistent_id: wsMessage.persistentId,
       connection_id: event.requestContext.connectionId!,
-      created_date: Date.now() / 1000,
+      created_date: Date.now() / 1000
     };
     await saveRoom(room);
+
+    const columns = getDefaultColumns(room.room_name);
+    await saveColumns(columns);
+
     await respondToWebsocket(client, event, {
       type: MessageType.ROOM_JOINED,
       roomName: room.room_name,
-      columns: [] // TODO create some default columns and return them here
-    })
+      columns: mapColumnsToView(columns)
+    });
   }
+}
+
+function mapColumnsToView(columns: DbColumn[]): ViewColumn[] {
+  return columns.map(dbColumn => ({
+    columnId: dbColumn.column_id,
+    columnName: dbColumn.column_name,
+    isOpen: dbColumn.is_open,
+    posts: []
+  }));
 }
 
 function createPersistentId(): string {

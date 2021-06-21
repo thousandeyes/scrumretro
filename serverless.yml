@@ -37,6 +37,7 @@ provider:
     DYNAMODB_TB_ROOMS_IDX_PERSISTENT_ID: ${self:custom.dynamoDb.roomsTable.persistentIdIndex}
     DYNAMODB_TB_ROOMS_IDX_CONNECTION_ID: ${self:custom.dynamoDb.roomsTable.connectionIdIndex}
     DYNAMODB_TB_COLUMNS: ${self:custom.dynamoDb.columnsTable.name}
+    DYNAMODB_TB_COLUMNS_IDX_ROOM_NAME: ${self:custom.dynamoDb.columnsTable.roomNameIndex}
     DYNAMODB_TB_POSTS: ${self:custom.dynamoDb.postsTable.name}
     DYNAMODB_TB_PARTICIPANTS: ${self:custom.dynamoDb.participantsTable.name}
 
@@ -48,8 +49,8 @@ custom:
       persistentIdIndex: ${self:custom.dynamoDb.roomsTable.name}-idx_persistent_id
       connectionIdIndex: ${self:custom.dynamoDb.roomsTable.name}-idx_connection_id
     columnsTable:
-      name: ${self:service}-${self:provider.stage}-tb_columns
-      columnIdIndex: ${self:custom.dynamoDb.columnsTable.name}-idx_column_id
+      name: ${self:service}-${self:provider.stage}-tb_columns-v2
+      roomNameIndex: ${self:custom.dynamoDb.columnsTable.name}-idx_room_name
     postsTable:
       name: ${self:service}-${self:provider.stage}-tb_posts
     participantsTable:
@@ -196,13 +197,13 @@ resources:
           - AttributeName: column_id
             AttributeType: S
         KeySchema:
-          - AttributeName: room_name
+          - AttributeName: column_id
             KeyType: HASH
         GlobalSecondaryIndexes:
-          - IndexName: ${self:custom.dynamoDb.columnsTable.columnIdIndex}
+          - IndexName: ${self:custom.dynamoDb.columnsTable.roomNameIndex}
             Projection: { ProjectionType: ALL }
             KeySchema:
-              - AttributeName: column_id
+              - AttributeName: room_name
                 KeyType: HASH
     DynamoDbPostsTable:
       Type: 'AWS::DynamoDB::Table'
