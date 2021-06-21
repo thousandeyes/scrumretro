@@ -3,6 +3,7 @@ import dynamoDb from './dynamoDb';
 
 const TABLE_NAME: string = process.env.DYNAMODB_TB_ROOMS!;
 const CONNECTION_ID_IDX_NAME: string = process.env.DYNAMODB_TB_ROOMS_IDX_CONNECTION_ID!;
+const PERSISTENT_ID_IDX_NAME: string = process.env.DYNAMODB_TB_ROOMS_IDX_PERSISTENT_ID!;
 
 export async function findRoomByName(roomName: string): Promise<Room | undefined> {
     const result = await dynamoDb.get({
@@ -35,6 +36,28 @@ export async function findRoomByConnectionId(connectionId: string): Promise<Room
         return result.Items![0] as Room;
     }
 }
+
+export async function findRoomByPersistentId(persistentId: string): Promise<Room | undefined> {
+    const result = await dynamoDb.query({
+        TableName: TABLE_NAME,
+        IndexName: PERSISTENT_ID_IDX_NAME,
+        KeyConditionExpression: 'persistent_id = :persistent_id',
+        ExpressionAttributeValues: {
+            ':persistent_id': persistentId,
+        },
+    }).promise();
+
+    if (result.Count == null) {
+        return;
+    }
+    else if (result.Count > 1) {
+        return Promise.reject(new Error('findRoomByPersistentId returned more than one room'));
+    }
+    else if (result.Count == 1) {
+        return result.Items![0] as Room;
+    }
+}
+
 
 export async function saveRoom(room: Partial<Room>): Promise<void> {
     await dynamoDb.put({

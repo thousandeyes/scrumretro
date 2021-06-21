@@ -76,6 +76,9 @@ export default Vue.extend({
         case MessageType.PERSISTENT_ID_GENERATED:
           this.savePersistentId(message.persistentId);
           break;
+        case MessageType.ROOM_JOINED:
+          this.room.roomName = message.roomName;
+          break;
         default:
           console.warn('Unknown message received', {...message});
           break;

@@ -5,10 +5,12 @@ import {
   ClientMessage,
   MessageType,
   ParticipantLoginMessage,
+  ScrumMasterLoginMessage,
   ServerMessage
 } from "../../messages";
-import { findRoomByName } from "../db/rooms";
+import { findRoomByName, findRoomByPersistentId, saveRoom } from "../db/rooms";
 import { findParticipantByRoomNameAndPersistentId } from "../db/participants";
+import { getRoomName } from "../utils/roomName";
 
 export default async function(
   event: APIGatewayProxyEvent
@@ -23,7 +25,7 @@ export default async function(
   console.log(`received message ${message.type}`);
 
   switch (message.type) {
-    case MessageType.PARTICIPANT_LOGIN:
+    case MessageType.PARTICIPANT_LOGIN: {
       let { persistentId } = message;
       if (persistentId == null) {
         persistentId = createPersistentId();
@@ -35,10 +37,26 @@ export default async function(
 
       await joinRoom(client, event, { ...message, persistentId });
       return { statusCode: 200, body: "handled" };
+    }
+    case MessageType.SCRUM_MASTER_LOGIN: {
+      let { persistentId } = message;
+      if (persistentId == null) {
+        persistentId = createPersistentId();
+        await respondToWebsocket(client, event, {
+          type: MessageType.PERSISTENT_ID_GENERATED,
+          persistentId
+        });
+      }
+
+      await joinRoomAsScrumMaster(client, event, { ...message, persistentId });
+      return { statusCode: 200, body: 'handled' };
+    }
     default:
-      await respondToWebsocket(client, event, ({
-        error: `Unknown message type: ${message.type}`
-      } as unknown) as ServerMessage);
+      await respondToWebsocket(client, event, {
+        type: MessageType.ACTION_FAILED,
+        request: message,
+        details: 'Unknown message type'
+      });
       return { statusCode: 200, body: "handled" };
   }
 }
@@ -72,6 +90,37 @@ async function joinRoom(
   );
   if (existingParticipant) {
     // TODO send the posts here
+  }
+}
+
+async function joinRoomAsScrumMaster(
+  client: ApiGatewayManagementApi,
+  event: APIGatewayProxyEvent,
+  wsMessage: ScrumMasterLoginMessage & { persistentId: string }
+): Promise<void> {
+  console.log('joining room as scrum master')
+  let room = await findRoomByPersistentId(wsMessage.persistentId);
+  if (room) {
+    console.log(`found room for supplied persistent id: ${room.room_name}`)
+    await respondToWebsocket(client, event, {
+      type: MessageType.ROOM_JOINED,
+      roomName: room.room_name,
+      columns: [] // TODO fetch columns and return them here
+    });
+  } else {
+    console.log('creating new room (no persistent room found)')
+    room = {
+      room_name: getRoomName(),
+      persistent_id: wsMessage.persistentId,
+      connection_id: event.requestContext.connectionId!,
+      created_date: Date.now() / 1000,
+    };
+    await saveRoom(room);
+    await respondToWebsocket(client, event, {
+      type: MessageType.ROOM_JOINED,
+      roomName: room.room_name,
+      columns: [] // TODO create some default columns and return them here
+    })
   }
 }
 
