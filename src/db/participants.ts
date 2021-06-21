@@ -1,4 +1,4 @@
-import Participants from '../models/Participants';
+import Participant from '../models/Participant';
 import dynamoDb from './dynamoDb';
 
 const TABLE_NAME: string = process.env.DYNAMODB_TB_PARTICIPANTS!;
@@ -21,11 +21,11 @@ export async function findParticipantByRoomNameAndPersistentId(roomName: string,
     const participant = result.Items![0];
 
     if (participant.room_name === roomName) {
-        return participant as Participants;
+        return participant as Participant;
     }
 }
 
-export async function saveRoomParticipant(participant: Partial<Participants>): Promise<void> {
+export async function saveRoomParticipant(participant: Partial<Participant>): Promise<void> {
     await dynamoDb.put({
         TableName: TABLE_NAME,
         Item: {
