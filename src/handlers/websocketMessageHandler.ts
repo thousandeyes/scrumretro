@@ -9,7 +9,7 @@ import {
   ServerMessage
 } from "../../messages";
 import { findRoomByName, findRoomByPersistentId, saveRoom } from "../db/rooms";
-import { findParticipantByRoomNameAndPersistentId } from "../db/participants";
+import { findParticipantByRoomNameAndPersistentId, saveRoomParticipant } from "../db/participants";
 import { getRoomName } from "../utils/roomName";
 
 export default async function(
@@ -88,9 +88,25 @@ async function joinRoom(
     wsMessage.roomName,
     wsMessage.persistentId
   );
-  if (existingParticipant) {
-    // TODO send the posts here
+
+  if (!existingParticipant) {
+    await saveRoomParticipant({
+      room_name: wsMessage.roomName,
+      participant_name: wsMessage.participantName,
+      persistent_id: wsMessage.persistentId,
+      connection_id: event.requestContext.connectionId!
+    });
   }
+
+  await client.postToConnection({
+    ConnectionId: room.connection_id,
+    Data: JSON.stringify({
+        type: MessageType.PARTICIPANT_JOINED,
+        roomName: wsMessage.roomName,
+        participantName: wsMessage.participantName,
+        persistentId: wsMessage.persistentId
+    }),
+  }).promise();
 }
 
 async function joinRoomAsScrumMaster(
