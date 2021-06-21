@@ -2,6 +2,7 @@ import Column from "./client/models/Column";
 
 export enum MessageType {
     PARTICIPANT_LOGIN = 'PARTICIPANT_LOGIN',
+    PARTICIPANT_JOINED = 'PARTICIPANT_JOINED',
     SCRUM_MASTER_LOGIN = 'SCRUM_MASTER_LOGIN',
     PERSISTENT_ID_GENERATED = 'PERSISTENT_ID_GENERATED',
     ROOM_JOINED = 'ROOM_JOINED',
@@ -38,6 +39,13 @@ export interface RoomJoinedMessage {
     type: MessageType.ROOM_JOINED,
     roomName: string;
     columns: Column[];
+}
+
+export interface ParticipantJoinedMessage {
+    type: MessageType.PARTICIPANT_JOINED,
+    roomName: string;
+    participantName: string;
+    persistentId: string;
 }
 
 export interface ActionFailedMessage {
