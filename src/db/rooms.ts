@@ -1,14 +1,13 @@
 import Room from '../models/Room';
 import dynamoDb from './dynamoDb';
 
-const TABLE_NAME: string = process.env.DYNAMODB_ROOMS_TABLE!;
-const CONNECTION_ID_IDX_NAME: string = process.env.DYNAMODB_ROOMS_CONNECTION_ID_INDEX!;
-const ROOM_TTL_DEFAULT: number = 2 * 60 * 60;
+const TABLE_NAME: string = process.env.DYNAMODB_TB_ROOMS!;
+const CONNECTION_ID_IDX_NAME: string = process.env.DYNAMODB_TB_ROOMS_IDX_CONNECTION_ID!;
 
 export async function findRoomByName(roomName: string): Promise<Room | undefined> {
     const result = await dynamoDb.get({
         TableName: TABLE_NAME,
-        Key: { room: roomName },
+        Key: { room_name: roomName },
     }).promise();
 
     if (result.Item) {
@@ -20,9 +19,9 @@ export async function findRoomByConnectionId(connectionId: string): Promise<Room
     const result = await dynamoDb.query({
         TableName: TABLE_NAME,
         IndexName: CONNECTION_ID_IDX_NAME,
-        KeyConditionExpression: 'connectionId = :connectionId',
+        KeyConditionExpression: 'connection_id = :connection_id',
         ExpressionAttributeValues: {
-            ':connectionId': connectionId,
+            ':connection_id': connectionId,
         },
     }).promise();
 
@@ -41,8 +40,7 @@ export async function saveRoom(room: Partial<Room>): Promise<void> {
     await dynamoDb.put({
         TableName: TABLE_NAME,
         Item: {
-            createdAt: Date.now(),
-            ttl: Math.floor(Date.now() / 1000) + ROOM_TTL_DEFAULT,
+            created_at: Date.now(),
             ...room,
         },
     }).promise();
@@ -51,6 +49,6 @@ export async function saveRoom(room: Partial<Room>): Promise<void> {
 export async function deleteRoom(room: Room): Promise<void> {
     await dynamoDb.delete({
         TableName: TABLE_NAME,
-        Key: { room: room.room },
+        Key: { room_name: room.room_name },
     }).promise();
 }
