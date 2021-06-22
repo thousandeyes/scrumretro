@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import {
   AddPostMessage,
+  ChangeColumnOpenStateMessage,
   ClientMessage,
   MessageType,
   ParticipantLoginMessage,
@@ -21,7 +22,7 @@ import {
   getDefaultColumns,
   getDefaultEmptyColumn
 } from "../utils/defaultColumns";
-import { findColumnByColumnIdAndRoomName, findColumnsByRoomName, saveColumn, saveColumns } from "../db/columns";
+import { findColumnByColumnIdAndRoomName, findColumnsByRoomName, saveColumn, saveColumns, updateColumnOpenStateByColumnId } from "../db/columns";
 import DbColumn from "../models/Column";
 import DbPost from "../models/Post";
 import DbParticipant from "../models/Participant";
@@ -98,6 +99,10 @@ export default async function(
     }
     case MessageType.ADD_POST: {
       await addPost(client, event, message);
+      return { statusCode: 200, body: "handled" };
+    }
+    case MessageType.CHANGE_COLUMN_OPEN_STATE: {
+      await changeColumnOpenState(client, event, message);
       return { statusCode: 200, body: "handled" };
     }
     default:
@@ -379,5 +384,38 @@ async function addPost(
   await respondToWebsocket(client, event, {
     type: MessageType.POST_ADDED,
     post: viewPost,
+  });
+}
+
+async function changeColumnOpenState(
+  client: ApiGatewayManagementApi,
+  event: APIGatewayProxyEvent,
+  request: ChangeColumnOpenStateMessage
+): Promise<void> {
+  const column = await findColumnByColumnIdAndRoomName(request.columnId, request.roomName);
+  if (!column) {
+    await respondToWebsocket(client, event, {
+      type: MessageType.ACTION_FAILED,
+      request,
+      details: 'Column not found'
+    });
+    return;
+  }
+
+  await updateColumnOpenStateByColumnId(request.columnId, request.isOpen);
+  
+  const participants = await findParticipantsByRoomName(request.roomName);
+  for (const participant of participants) {
+    await sendToWebsocket(client, participant.connection_id, {
+      type: MessageType.COLUMN_OPEN_STATE_CHANGED,
+      columnId: request.columnId,
+      isOpen: request.isOpen,
+    });
+  }
+
+  await respondToWebsocket(client, event, {
+    type: MessageType.COLUMN_OPEN_STATE_CHANGED,
+    columnId: request.columnId,
+    isOpen: request.isOpen,
   });
 }

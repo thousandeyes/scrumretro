@@ -55,3 +55,16 @@ export async function saveColumn(column: Column): Promise<void> {
     })
     .promise();
 }
+
+export async function updateColumnOpenStateByColumnId(columnId: string, isOpen: boolean): Promise<Column> {
+  const result = await dynamoDb.update({
+    TableName: TABLE_NAME,
+    Key: { column_id: columnId },
+    UpdateExpression: 'SET is_open = :is_open',
+    ExpressionAttributeValues: {
+      ':is_open': isOpen
+    },
+    ReturnValues: 'ALL_NEW'
+  }).promise();
+  return result.Attributes as Column;
+}
