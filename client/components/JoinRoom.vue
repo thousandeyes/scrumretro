@@ -12,13 +12,13 @@
       />
     </fieldset>
     <fieldset>
-      <label for="playerNameInput">Your Name</label>
+      <label for="participantNameInput">Your Name</label>
       <input
-        v-model="playerName"
+        v-model="participantName"
         placeholder="Mary Shelley"
         type="text"
-        name="playerNameInput"
-        id="playerNameInput"
+        name="participantNameInput"
+        id="participantNameInput"
       />
     </fieldset>
     <button type="submit" class="join-button" :disabled="joinDisabled">
@@ -35,12 +35,15 @@ export default Vue.extend({
     onJoinRoomClick: {
       type: Function as PropType<OnJoinRoomClick>,
       required: true
+    },
+    roomNameParam: {
+      type: String
     }
   },
   data(): State {
     return {
-      roomName: undefined,
-      playerName: undefined
+      roomName: this.roomNameParam,
+      participantName: undefined
     };
   },
   computed: {
@@ -50,21 +53,41 @@ export default Vue.extend({
   },
   methods: {
     submit() {
-      if (this.roomName == null || this.playerName == null) {
+      if (this.roomName == null || this.participantName == null) {
         return;
       }
-      this.onJoinRoomClick(this.roomName, this.playerName);
+      this.onJoinRoomClick(this.roomName, this.participantName);
+      saveName(this.$config.stage, this.participantName);
     }
+  },
+  mounted() {
+    this.participantName = loadName(this.$config.stage);
   }
 });
 
 interface State {
-  playerName?: string;
+  participantName?: string;
   roomName?: string;
 }
 
 interface OnJoinRoomClick {
   (roomName: string, participantName: string): void;
+}
+
+function loadName(stage: string): string | undefined {
+  if (window.localStorage) {
+    return window.localStorage[getStorageKey(stage)];
+  }
+}
+
+function saveName(stage: string, participantName: string) {
+  if (window.localStorage) {
+    window.localStorage[getStorageKey(stage)] = participantName;
+  }
+}
+
+function getStorageKey(stage: string) {
+  return `${stage}/participant/participantName`;
 }
 </script>
 

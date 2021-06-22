@@ -14,6 +14,11 @@ const persistentStorageKeyMap: Record<ROOM_MODE, string> = {
   PLAYER: "participant/persistentId"
 };
 
+const roomModeBaseUrlMap: Record<ROOM_MODE, string> = {
+  HOST: "/host",
+  PLAYER: "/play"
+};
+
 export default {
   init(
     state: Room,
@@ -41,6 +46,14 @@ export default {
   },
   ROOM_JOINED(state: Room, { roomName, columns }: RoomJoinedMessage) {
     Object.assign(state, { roomName, columns });
+    const { roomMode } = state;
+    if (roomMode === ROOM_MODE.PLAYER) {
+      window.history.replaceState(
+        {},
+        `LOL Scrum Retro ${roomName}`,
+        `${roomModeBaseUrlMap[roomMode]}/${roomName}`
+      );
+    }
   },
   COLUMNS_UPDATED(state: Room, { columns }: ColumnsUpdatedMessage) {
     Object.assign(state, { columns });

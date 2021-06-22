@@ -5,24 +5,28 @@
     <div v-if="room.roomName != null" class="play">
       <ViewColumns :columns="room.columns" :onPostSubmit="onPostSubmit" />
     </div>
-    <JoinRoom v-else :onJoinRoomClick="onJoinRoomClick" />
+    <JoinRoom
+      v-else
+      :roomNameParam="roomNameParam"
+      :onJoinRoomClick="onJoinRoomClick"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import { mapMutations, mapGetters } from "vuex";
-import ViewColumns from "../components/ViewColumns.vue";
-import JoinRoom from "../components/JoinRoom.vue";
-import RoomDetails from "../components/RoomDetails.vue";
+import ViewColumns from "../../components/ViewColumns.vue";
+import JoinRoom from "../../components/JoinRoom.vue";
+import RoomDetails from "../../components/RoomDetails.vue";
 import {
   AddPostMessage,
   MessageType,
   ParticipantLoginMessage,
   RoomJoinedMessage,
   ServerMessage
-} from "../../messages";
-import { ROOM_MODE } from "../models/Room";
+} from "../../../messages";
+import { ROOM_MODE } from "../../models/Room";
 
 export default Vue.extend({
   components: { RoomDetails, ViewColumns, JoinRoom },
@@ -32,7 +36,10 @@ export default Vue.extend({
     };
   },
   mounted() {
-    this.initRoomState(this.$config.stage, ROOM_MODE.PLAYER);
+    this.initRoomState({
+      stage: this.$config.stage,
+      roomMode: ROOM_MODE.PLAYER
+    });
     this.socket = new WebSocket(this.$config.websocketUrl);
     this.socket.onopen = () => this.socketOpened();
     this.socket.onmessage = event => this.onSocketMessage(event);
@@ -43,7 +50,10 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       room: "room/getPlayerRoom"
-    })
+    }),
+    roomNameParam() {
+      return this.$route.params.roomName;
+    }
   },
   methods: {
     ...mapMutations({
