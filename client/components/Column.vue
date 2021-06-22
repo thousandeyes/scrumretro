@@ -49,7 +49,8 @@ export default Vue.extend({
           persistentId: "THIS ID!",
           participantName: "RUUUUIIIII"
         },
-        submittedDate: Date.now() / 1000
+        submittedDate: Date.now() / 1000,
+        columnId: this.column.columnId,
       };
       this.column.posts.unshift(post);
     }

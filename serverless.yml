@@ -39,7 +39,10 @@ provider:
     DYNAMODB_TB_COLUMNS: ${self:custom.dynamoDb.columnsTable.name}
     DYNAMODB_TB_COLUMNS_IDX_ROOM_NAME: ${self:custom.dynamoDb.columnsTable.roomNameIndex}
     DYNAMODB_TB_POSTS: ${self:custom.dynamoDb.postsTable.name}
+    DYNAMODB_TB_POSTS_IDX_COLUMN_ID: ${self:custom.dynamoDb.postsTable.columnIdIndex}
+    DYNAMODB_TB_POSTS_IDX_ROOM_NAME: ${self:custom.dynamoDb.postsTable.roomNameIndex}
     DYNAMODB_TB_PARTICIPANTS: ${self:custom.dynamoDb.participantsTable.name}
+    DYNAMODB_TB_PARTICIPANTS_IDX_ROOM_NAME: ${self:custom.dynamoDb.participantsTable.roomNameIndex}
 
 custom:
   secrets: ${file(.settings/secrets.json)}
@@ -52,7 +55,9 @@ custom:
       name: ${self:service}-${self:provider.stage}-tb_columns-v2
       roomNameIndex: ${self:custom.dynamoDb.columnsTable.name}-idx_room_name
     postsTable:
-      name: ${self:service}-${self:provider.stage}-tb_posts
+      name: ${self:service}-${self:provider.stage}-tb_posts-v2
+      columnIdIndex: ${self:custom.dynamoDb.postsTable.name}-idx_column_id
+      roomNameIndex: ${self:custom.dynamoDb.postsTable.name}-idx_room_name
     participantsTable:
       name: ${self:service}-${self:provider.stage}-tb_participants
       roomNameIndex: ${self:custom.dynamoDb.participantsTable.name}-idx_room_name
@@ -218,11 +223,26 @@ resources:
         TableName: ${self:custom.dynamoDb.postsTable.name}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
+          - AttributeName: post_id
+            AttributeType: S
           - AttributeName: column_id
             AttributeType: S
+          - AttributeName: room_name
+            AttributeType: S
         KeySchema:
-          - AttributeName: column_id
+          - AttributeName: post_id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:custom.dynamoDb.postsTable.columnIdIndex}
+            Projection: { ProjectionType: ALL }
+            KeySchema:
+              - AttributeName: column_id
+                KeyType: HASH
+          - IndexName: ${self:custom.dynamoDb.postsTable.roomNameIndex}
+            Projection: { ProjectionType: ALL }
+            KeySchema:
+              - AttributeName: room_name
+                KeyType: HASH
     DynamoDbParticipantsTable:
       Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Delete

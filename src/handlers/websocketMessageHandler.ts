@@ -12,6 +12,7 @@ import {
 import { findRoomByName, findRoomByPersistentId, saveRoom } from "../db/rooms";
 import {
   findParticipantByRoomNameAndPersistentId,
+  findParticipantsByRoomName,
   saveRoomParticipant
 } from "../db/participants";
 import { getRoomName } from "../utils/roomName";
@@ -21,7 +22,16 @@ import {
 } from "../utils/defaultColumns";
 import { findColumnsByRoomName, saveColumn, saveColumns } from "../db/columns";
 import DbColumn from "../models/Column";
+import DbPost from "../models/Post";
+import DbParticipant from "../models/Participant";
 import ViewColumn from "../../client/models/Column";
+import ViewPost from "../../client/models/Post";
+import ViewParticipant from "../../client/models/Participant";
+import {
+  findPostsByRoomName,
+  findPostsByRoomNameAndParticipantId
+} from "../db/posts";
+import { keyBy } from "lodash";
 
 export default async function(
   event: APIGatewayProxyEvent
@@ -101,6 +111,7 @@ async function joinRoom(
 ): Promise<void> {
   console.log("joining a room");
   const room = await findRoomByName(wsMessage.roomName);
+  console.log(`Room with name ${wsMessage.roomName}:`, room);
   if (!room) {
     await respondToWebsocket(client, event, {
       type: MessageType.ACTION_FAILED,
@@ -110,38 +121,41 @@ async function joinRoom(
     return;
   }
 
-  console.log("sending ROOM_JOINED");
-  await respondToWebsocket(client, event, {
-    type: MessageType.ROOM_JOINED,
-    roomName: room.room_name,
-    columns: [] // TODO fetch columns and return them here
-  });
-
-  const existingParticipant = await findParticipantByRoomNameAndPersistentId(
+  let existingParticipant = await findParticipantByRoomNameAndPersistentId(
     wsMessage.roomName,
     wsMessage.persistentId
   );
 
   if (!existingParticipant) {
-    await saveRoomParticipant({
+    existingParticipant = {
       room_name: wsMessage.roomName,
       participant_name: wsMessage.participantName,
       persistent_id: wsMessage.persistentId,
       connection_id: event.requestContext.connectionId!
-    });
+    };
+    await saveRoomParticipant(existingParticipant);
   }
 
-  await client
-    .postToConnection({
-      ConnectionId: room.connection_id,
-      Data: JSON.stringify({
-        type: MessageType.PARTICIPANT_JOINED,
-        roomName: wsMessage.roomName,
-        participantName: wsMessage.participantName,
-        persistentId: wsMessage.persistentId
-      })
-    })
-    .promise();
+  const columns = await findColumnsByRoomName(room.room_name);
+  const posts = await findPostsByRoomNameAndParticipantId(
+    room.room_name,
+    wsMessage.persistentId
+  );
+  const viewPosts = mapPostsToView(posts, [existingParticipant]);
+  console.log("sending ROOM_JOINED");
+  await respondToWebsocket(client, event, {
+    type: MessageType.ROOM_JOINED,
+    roomName: room.room_name,
+    columns: mapColumnsToView(columns, viewPosts)
+  });
+
+  console.log("sending PARTICIPANT_JOINED");
+  await sendToWebsocket(client, room.connection_id, {
+    type: MessageType.PARTICIPANT_JOINED,
+    roomName: wsMessage.roomName,
+    participantName: wsMessage.participantName,
+    persistentId: wsMessage.persistentId
+  });
 }
 
 async function joinRoomAsScrumMaster(
@@ -154,11 +168,14 @@ async function joinRoomAsScrumMaster(
   if (room) {
     console.log(`found room for supplied persistent id: ${room.room_name}`);
     const columns = await findColumnsByRoomName(room.room_name);
+    const posts = await findPostsByRoomName(room.room_name);
+    const participants = await findParticipantsByRoomName(room.room_name);
+    const viewPosts = mapPostsToView(posts, participants);
 
     await respondToWebsocket(client, event, {
       type: MessageType.ROOM_JOINED,
       roomName: room.room_name,
-      columns: mapColumnsToView(columns)
+      columns: mapColumnsToView(columns, viewPosts)
     });
   } else {
     console.log("creating new room (no persistent room found)");
@@ -176,17 +193,53 @@ async function joinRoomAsScrumMaster(
     await respondToWebsocket(client, event, {
       type: MessageType.ROOM_JOINED,
       roomName: room.room_name,
-      columns: mapColumnsToView(columns)
+      columns: mapColumnsToView(columns, [])
     });
   }
 }
 
-function mapColumnsToView(columns: DbColumn[]): ViewColumn[] {
+function mapColumnsToView(
+  columns: DbColumn[],
+  posts: ViewPost[]
+): ViewColumn[] {
+  const postsByColumnId: Record<string, ViewPost[]> = {};
+  for (const post of posts) {
+    if (!postsByColumnId[post.columnId]) {
+      postsByColumnId[post.columnId] = [];
+    }
+    postsByColumnId[post.columnId].push(post);
+  }
   return columns.map(dbColumn => ({
     columnId: dbColumn.column_id,
     columnName: dbColumn.column_name,
     isOpen: dbColumn.is_open,
-    posts: []
+    posts: postsByColumnId[dbColumn.column_id] || [],
+  }));
+}
+
+function mapPostsToView(
+  posts: DbPost[],
+  participants: DbParticipant[]
+): ViewPost[] {
+  const participantsById = keyBy(
+    mapParticipantsToView(participants),
+    "persistentId"
+  );
+  return posts.map(dbPost => ({
+    postId: dbPost.post_id,
+    columnId: dbPost.column_id,
+    participant: participantsById[dbPost.participant_id],
+    submittedDate: dbPost.submitted_date,
+    text: dbPost.content
+  }));
+}
+
+function mapParticipantsToView(
+  participants: DbParticipant[]
+): ViewParticipant[] {
+  return participants.map(dbParticipant => ({
+    persistentId: dbParticipant.persistent_id,
+    participantName: dbParticipant.participant_name
   }));
 }
 
@@ -199,18 +252,23 @@ async function respondToWebsocket<M extends ServerMessage>(
   event: APIGatewayProxyEvent,
   wsMessage: M
 ): Promise<void> {
+  await sendToWebsocket(client, event.requestContext.connectionId!, wsMessage);
+}
+
+async function sendToWebsocket<M extends ServerMessage>(
+  client: ApiGatewayManagementApi,
+  connectionId: string,
+  wsMessage: M
+): Promise<void> {
   try {
     await client
       .postToConnection({
-        ConnectionId: event.requestContext.connectionId!,
+        ConnectionId: connectionId,
         Data: JSON.stringify(wsMessage)
       })
       .promise();
   } catch (e) {
-    console.error(
-      `Error sending message to client at ${event.requestContext.connectionId}`,
-      e
-    );
+    console.error(`Error sending message to client at ${connectionId}`, e);
   }
 }
 
@@ -257,7 +315,7 @@ async function addColumn(
 
   await respondToWebsocket(client, event, {
     type: MessageType.COLUMNS_UPDATED,
-    columns: mapColumnsToView(await findColumnsByRoomName(room.room_name))
+    columns: mapColumnsToView(await findColumnsByRoomName(room.room_name), [])
   });
 
   return;

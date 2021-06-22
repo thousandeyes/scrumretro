@@ -22,6 +22,7 @@ export type ClientMessage =
 export type ServerMessage =
   | PersistentIdGeneratedMessage
   | RoomJoinedMessage
+  | ParticipantJoinedMessage
   | ActionFailedMessage
   | ColumnsUpdatedMessage
   | InternalError
