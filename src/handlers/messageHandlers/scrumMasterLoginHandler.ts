@@ -1,9 +1,10 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ApiGatewayManagementApi } from "aws-sdk";
+import { flatten } from "lodash";
 import { MessageType, ScrumMasterLoginMessage } from "../../../messages";
 import { findColumnsByRoomName, saveColumns } from "../../db/columns";
 import { findParticipantsByRoomName } from "../../db/participants";
-import { findPostsByRoomName } from "../../db/posts";
+import { findPostsByColumnId } from "../../db/posts";
 import { findRoomByPersistentId, saveRoom } from "../../db/rooms";
 import { getDefaultColumns } from "../../utils/defaultColumns";
 import { mapPostsToView, mapColumnsToView } from "../../utils/mappers";
@@ -39,7 +40,11 @@ async function joinRoomAsScrumMaster(
   if (room) {
     console.log(`found room for supplied persistent id: ${room.room_name}`);
     const columns = await findColumnsByRoomName(room.room_name);
-    const posts = await findPostsByRoomName(room.room_name);
+    const posts = flatten(
+      await Promise.all(
+        columns.map(({ column_id }) => findPostsByColumnId(column_id))
+      )
+    );
     const participants = await findParticipantsByRoomName(room.room_name);
     const viewPosts = mapPostsToView(posts, participants);
 

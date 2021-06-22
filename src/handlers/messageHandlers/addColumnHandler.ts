@@ -1,11 +1,14 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ApiGatewayManagementApi } from "aws-sdk";
+import { flatten } from "lodash";
 import { ScrumMasterAddColumnMessage, MessageType } from "../../../messages";
 import { saveColumn, findColumnsByRoomName } from "../../db/columns";
+import { findParticipantsByRoomName } from "../../db/participants";
+import { findPostsByColumnId } from "../../db/posts";
 import { findRoomByPersistentId } from "../../db/rooms";
 import { getDefaultEmptyColumn } from "../../utils/defaultColumns";
-import { mapColumnsToView } from "../../utils/mappers";
-import { respondToWebsocket } from "../../utils/websockets";
+import { mapColumnsToView, mapPostsToView } from "../../utils/mappers";
+import { respondToWebsocket, sendToWebsocket } from "../../utils/websockets";
 
 export default async function addColumnHandler(
   client: ApiGatewayManagementApi,
@@ -45,10 +48,25 @@ async function addColumn(
   const column = getDefaultEmptyColumn(room.room_name);
   await saveColumn(column);
 
+  const columns = await findColumnsByRoomName(room.room_name);
+  const posts = flatten(
+    await Promise.all(
+      columns.map(({ column_id }) => findPostsByColumnId(column_id))
+    )
+  );
+  const participants = await findParticipantsByRoomName(room.room_name);
+  const viewPosts = mapPostsToView(posts, participants);
+  const viewColumns = mapColumnsToView(columns, viewPosts);
+
   await respondToWebsocket(client, event, {
     type: MessageType.COLUMNS_UPDATED,
-    columns: mapColumnsToView(await findColumnsByRoomName(room.room_name), [])
+    columns: viewColumns
   });
 
-  return;
+  for (const participant of participants) {
+    await sendToWebsocket(client, participant.connection_id, {
+      type: MessageType.COLUMNS_UPDATED,
+      columns: viewColumns
+    });
+  }
 }

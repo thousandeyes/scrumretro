@@ -2,16 +2,16 @@ import Post from "../models/Post";
 import dynamoDb from "./dynamoDb";
 
 const TABLE_NAME: string = process.env.DYNAMODB_TB_POSTS!;
-const ROOM_NAME_INDEX: string = process.env.DYNAMODB_TB_POSTS_IDX_ROOM_NAME!;
+const COLUMN_ID_INDEX: string = process.env.DYNAMODB_TB_POSTS_IDX_COLUMN_ID!;
 
-export async function findPostsByRoomName(roomName: string): Promise<Post[]> {
+export async function findPostsByColumnId(columnId: string): Promise<Post[]> {
   const results = await dynamoDb
     .query({
       TableName: TABLE_NAME,
-      IndexName: ROOM_NAME_INDEX,
-      KeyConditionExpression: "room_name = :room_name",
+      IndexName: COLUMN_ID_INDEX,
+      KeyConditionExpression: "column_id = :column_id",
       ExpressionAttributeValues: {
-        ":room_name": roomName
+        ":column_id": columnId
       }
     })
     .promise();
@@ -19,18 +19,18 @@ export async function findPostsByRoomName(roomName: string): Promise<Post[]> {
   return (results.Items as Post[]) || [];
 }
 
-export async function findPostsByRoomNameAndParticipantId(
+export async function findPostsByColumnIdAndParticipantId(
   roomName: string,
   participantId: string
 ): Promise<Post[]> {
   const results = await dynamoDb
     .query({
       TableName: TABLE_NAME,
-      IndexName: ROOM_NAME_INDEX,
-      KeyConditionExpression: "room_name = :room_name",
+      IndexName: COLUMN_ID_INDEX,
+      KeyConditionExpression: "column_id = :column_id",
       FilterExpression: "participant_id = :participant_id",
       ExpressionAttributeValues: {
-        ":room_name": roomName,
+        ":column_id": roomName,
         ":participant_id": participantId
       }
     })
