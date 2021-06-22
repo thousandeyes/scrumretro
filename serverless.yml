@@ -94,17 +94,17 @@ functions:
     events:
       - websocket:
           route: $default
-  # disconnect:
-  #   handler: ./dist/handler.websocketDisconnectedHandler
+  disconnect:
+    handler: ./dist/handler.websocketDisconnectedHandler
   #   environment:
   #     DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
   #     DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
   #     DYNAMODB_ROOM_PLAYERS_TABLE: ${self:custom.dynamoDbRoomPlayersTable}
   #     DYNAMODB_ROOMS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomsTableConnectionIdIndex}
   #     DYNAMODB_ROOM_PLAYERS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomPlayersTableConnectionIdIndex}
-  #   events:
-  #     - websocket:
-  #         route: $disconnect
+    events:
+      - websocket:
+        route: $disconnect
 
   nuxt:
     handler: ./dist/handler.nuxtHandler

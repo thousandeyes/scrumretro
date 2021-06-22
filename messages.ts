@@ -4,6 +4,7 @@ import Post from "./client/models/Post";
 export enum MessageType {
   PARTICIPANT_LOGIN = "PARTICIPANT_LOGIN",
   PARTICIPANT_JOINED = "PARTICIPANT_JOINED",
+  PARTICIPANT_LEFT = "PARTICIPANT_LEFT",
   SCRUM_MASTER_LOGIN = "SCRUM_MASTER_LOGIN",
   SCRUM_MASTER_ADD_COLUMN = "SCRUM_MASTER_ADD_COLUMN",
   COLUMNS_UPDATED = "COLUMNS_UPDATED",
@@ -35,6 +36,7 @@ export type ServerMessage =
   | PersistentIdGeneratedMessage
   | RoomJoinedMessage
   | ParticipantJoinedMessage
+  | ParticipantLeftMessage
   | ActionFailedMessage
   | ColumnsUpdatedMessage
   | InternalError
@@ -78,6 +80,13 @@ export interface RoomJoinedMessage {
 
 export interface ParticipantJoinedMessage {
   type: MessageType.PARTICIPANT_JOINED;
+  roomName: string;
+  participantName: string;
+  persistentId: string;
+}
+
+export interface ParticipantLeftMessage {
+  type: MessageType.PARTICIPANT_LEFT;
   roomName: string;
   participantName: string;
   persistentId: string;

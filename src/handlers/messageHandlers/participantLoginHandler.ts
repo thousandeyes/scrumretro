@@ -58,7 +58,8 @@ async function joinRoom(
       room_name: wsMessage.roomName,
       participant_name: wsMessage.participantName,
       persistent_id: wsMessage.persistentId,
-      connection_id: event.requestContext.connectionId!
+      connection_id: event.requestContext.connectionId!,
+      online: true
     };
     await saveRoomParticipant(existingParticipant);
   } else {
