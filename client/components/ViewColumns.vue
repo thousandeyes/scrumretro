@@ -64,7 +64,7 @@ export default Vue.extend({
   overflow: auto;
   display: flex;
   justify-content: center;
-  align-items: baseline;
+  align-items: stretch;
 }
 
 .manage-columns-btns {
