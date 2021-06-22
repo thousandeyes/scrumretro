@@ -100,10 +100,6 @@ export default Vue.extend({
   height: 100px;
 }
 
-.post-display {
-  word-break: break-all;
-}
-
 .no-posts {
   text-align: center;
 }

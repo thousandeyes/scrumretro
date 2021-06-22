@@ -10,7 +10,7 @@
       :onColumnRenamed="onColumnRenamed"
       :onColumnDeleted="onColumnDeleted"
     />
-    <h3 v-if="noColumns" class="no-columns">
+    <h3 v-if="!adminMode && noColumns" class="no-columns">
       Host has not enabled columns for submissions
     </h3>
     <div v-if="adminMode">
@@ -34,28 +34,28 @@ export default Vue.extend({
     onNewColumn: { type: Function as PropType<() => void>, default: () => {} },
     onPostSubmit: {
       type: Function as PropType<(columnId: string, content: string) => void>,
-      default: () => {},
+      default: () => {}
     },
     onColumnOpened: {
       type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
-      default: () => {},
+      default: () => {}
     },
     onColumnRenamed: {
       type: Function as PropType<
         (columnId: string, columnName: string) => void
       >,
-      default: () => {},
+      default: () => {}
     },
     onColumnDeleted: {
       type: Function as PropType<(columnId: string) => void>,
-      default: () => {},
-    },
+      default: () => {}
+    }
   },
   computed: {
     noColumns() {
       return this.columns.length === 0;
-    },
-  },
+    }
+  }
 });
 </script>
 
@@ -64,7 +64,7 @@ export default Vue.extend({
   overflow: auto;
   display: flex;
   justify-content: center;
-  align-items: stretch;
+  align-items: baseline;
 }
 
 .manage-columns-btns {

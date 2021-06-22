@@ -1,19 +1,21 @@
 <template>
   <div class="host-page">
-    <RoomDetails :persistentIdKey="persistentIdKey" :room="room" />
-    <ViewColumns
-      :columns="room.columns"
-      :adminMode="true"
-      :onNewColumn="onNewColumn"
-      :onColumnOpened="onColumnOpened"
-      :onColumnRenamed="onColumnRenamed"
-      :onColumnDeleted="onColumnDeleted"
-    />
+    <RoomDetails :room="room" />
+    <div class="main-container">
+      <ViewParticipants :room="room" />
+      <ViewColumns
+        :columns="room.columns"
+        :adminMode="true"
+        :onNewColumn="onNewColumn"
+        :onColumnOpened="onColumnOpened"
+        :onColumnRenamed="onColumnRenamed"
+        :onColumnDeleted="onColumnDeleted"
+      />
+    </div>
     <SyncNotes
-      :persistentIdKey="persistentIdKey"
+      class="sync-notes"
       :onSync="onSyncNotes"
       :state="syncNotesState"
-      class="sync-notes"
     />
   </div>
 </template>
@@ -22,15 +24,18 @@
 import Vue from "vue";
 import { mapMutations, mapGetters } from "vuex";
 import { MessageType, ServerMessage } from "../../messages";
+import ViewParticipants from "../components/ViewParticipants.vue";
 import ViewColumns from "../components/ViewColumns.vue";
 import RoomDetails from "../components/RoomDetails.vue";
 import SyncNotes from "../components/SyncNotes.vue";
 import { ROOM_MODE } from "../models/Room";
 
+ViewParticipants;
+
 const PERSISTENT_ID_KEY = "persistentId";
 
 export default Vue.extend({
-  components: { RoomDetails, ViewColumns, SyncNotes },
+  components: { RoomDetails, ViewColumns, SyncNotes, ViewParticipants },
   data(): State {
     return {
       persistentIdKey: PERSISTENT_ID_KEY,
@@ -77,6 +82,7 @@ export default Vue.extend({
         case MessageType.POST_ADDED:
         case MessageType.COLUMN_OPEN_STATE_CHANGED:
         case MessageType.COLUMN_NAME_CHANGED:
+        case MessageType.PARTICIPANT_JOINED:
           this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.CONFLUENCE_NOTES_SYNCED:
@@ -132,10 +138,10 @@ export default Vue.extend({
           type: MessageType.CHANGE_COLUMN_NAME,
           roomName: this.room.roomName,
           columnId,
-          columnName,
+          columnName
         })
       );
-    },
+    }
   }
 });
 
@@ -155,12 +161,18 @@ interface State {
   flex-direction: column;
 }
 
-.view-columns {
+.main-container {
+  display: flex;
   flex: 1 0;
+}
+
+.view-columns {
+  flex-basis: 100%;
 }
 
 .sync-notes {
   height: auto;
   flex-basis: 100px;
+  padding: 5px 20px;
 }
 </style>

@@ -2,7 +2,7 @@ import {
   ColumnNameChangedMessage,
   ColumnOpenStateChangedMessage,
   ColumnsUpdatedMessage,
-  MessageType,
+  ParticipantJoinedMessage,
   PersistentIdGeneratedMessage,
   PostAddedMessage,
   RoomJoinedMessage
@@ -90,7 +90,7 @@ export default {
   },
   COLUMN_NAME_CHANGED(
     state: Room,
-    { columnId, columnName }: ColumnNameChangedMessage,
+    { columnId, columnName }: ColumnNameChangedMessage
   ) {
     const columnsById = keyBy(state.columns, "columnId");
     const column = columnsById[columnId];
@@ -99,6 +99,21 @@ export default {
     }
 
     column.columnName = columnName;
+  },
+  PARTICIPANT_JOINED(
+    state: Room,
+    { persistentId, participantName }: ParticipantJoinedMessage
+  ) {
+    const participantsById = keyBy(state.participants, "persistentId");
+    if (participantsById[persistentId]) {
+      Object.assign(participantsById[persistentId], { participantName });
+      return;
+    }
+
+    state.participants.push({
+      persistentId,
+      participantName
+    });
   }
 };
 
