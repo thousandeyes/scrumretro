@@ -6,7 +6,6 @@
       :onColumnDeleted="onColumnDeleted"
       :adminMode="adminMode"
       :onColumnRenamed="onColumnRenamed"
-      :onMaskPostsChanged="onMaskPostsChanged"
     />
     <div class="column-container">
       <div v-if="!adminMode && column.isOpen" class="post-input column-item">
@@ -20,12 +19,15 @@
         >
           <ViewPost
             :post="post"
-            :masked="maskPosts"
+            :masked="adminMode && column.isOpen"
             :adminMode="adminMode"
             :onPostDeleted="onPostDeleted"
           />
         </div>
-        <h3 class="no-posts" v-if="noPosts">No posts</h3>
+        <h3 class="no-posts" v-if="noPosts">
+          <template v-if="column.isOpen"> You can now add posts </template>
+          <template v-else>No posts</template>
+        </h3>
       </div>
     </div>
   </div>
@@ -45,43 +47,37 @@ export default Vue.extend({
     adminMode: { type: Boolean, default: true },
     onPostSubmit: {
       type: Function as PropType<(columnId: string, content: string) => void>,
-      default: () => {},
+      default: () => {}
     },
     onColumnOpened: {
       type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
-      default: () => {},
+      default: () => {}
     },
     onColumnRenamed: {
       type: Function as PropType<
         (columnId: string, columnName: string) => void
       >,
-      default: () => {},
+      default: () => {}
     },
     onColumnDeleted: {
       type: Function as PropType<(columnId: string) => void>,
-      default: () => {},
+      default: () => {}
     },
     onPostDeleted: {
       type: Function as PropType<(postId: string) => void>,
-      default: () => {},
-    },
+      default: () => {}
+    }
   },
-  data: () => ({
-    maskPosts: false,
-  }),
   computed: {
     noPosts() {
       return this.column.posts.length === 0;
-    },
+    }
   },
   methods: {
     onPost(text: string) {
       this.onPostSubmit(this.column.columnId, text);
-    },
-    onMaskPostsChanged(maskPosts: boolean) {
-      this.maskPosts = maskPosts;
-    },
-  },
+    }
+  }
 });
 </script>
 
