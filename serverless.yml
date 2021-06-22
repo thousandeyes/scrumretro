@@ -43,6 +43,7 @@ provider:
     DYNAMODB_TB_POSTS_IDX_ROOM_NAME: ${self:custom.dynamoDb.postsTable.roomNameIndex}
     DYNAMODB_TB_PARTICIPANTS: ${self:custom.dynamoDb.participantsTable.name}
     DYNAMODB_TB_PARTICIPANTS_IDX_ROOM_NAME: ${self:custom.dynamoDb.participantsTable.roomNameIndex}
+    DYNAMODB_PARTICIPANTS_CONNECTION_ID_INDEX: ${self:custom.dynamoDb.participantsTable.connectionIdIndex}
 
 custom:
   secrets: ${file(.settings/secrets.json)}
@@ -96,15 +97,9 @@ functions:
           route: $default
   disconnect:
     handler: ./dist/handler.websocketDisconnectedHandler
-  #   environment:
-  #     DYNAMODB_VOTES_TABLE: ${self:custom.dynamoDbVotesTable}
-  #     DYNAMODB_ROOMS_TABLE: ${self:custom.dynamoDbRoomsTable}
-  #     DYNAMODB_ROOM_PLAYERS_TABLE: ${self:custom.dynamoDbRoomPlayersTable}
-  #     DYNAMODB_ROOMS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomsTableConnectionIdIndex}
-  #     DYNAMODB_ROOM_PLAYERS_CONNECTION_ID_INDEX: ${self:custom.dynamoDbRoomPlayersTableConnectionIdIndex}
     events:
       - websocket:
-        route: $disconnect
+          route: $disconnect
 
   nuxt:
     handler: ./dist/handler.nuxtHandler
