@@ -9,6 +9,7 @@
         :participant="post.participant"
       />
       <span class="post-content"> {{ post.text }} </span>
+      <button class="delete-post-btn" @click="() => onPostDeleted(post.postId)">❌</button>
     </template>
   </div>
 </template>
@@ -22,7 +23,8 @@ export default Vue.extend({
   components: { ParticipantBadge },
   props: {
     post: { type: Object as PropType<Post> },
-    masked: { type: Boolean, default: false }
+    masked: { type: Boolean, default: false },
+    onPostDeleted: { type: Function as PropType<(postId: string) => void>, default: () => {}},
   }
 });
 </script>
@@ -44,5 +46,11 @@ export default Vue.extend({
 .participant-badge {
   flex-shrink: 0;
   margin: 5px;
+}
+.delete-post-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  outline: none;
 }
 </style>

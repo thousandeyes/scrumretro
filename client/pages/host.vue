@@ -10,6 +10,7 @@
         :onColumnOpened="onColumnOpened"
         :onColumnRenamed="onColumnRenamed"
         :onColumnDeleted="onColumnDeleted"
+        :onPostDeleted="onPostDeleted"
       />
     </div>
     <SyncNotes
@@ -140,6 +141,15 @@ export default Vue.extend({
           roomName: this.room.roomName,
           columnId,
           columnName
+        })
+      );
+    },
+    onPostDeleted(postId: string) {
+      this.socket.send(
+        JSON.stringify({
+          type: MessageType.DELETE_POST,
+          roomName: this.room.roomName,
+          postId
         })
       );
     }

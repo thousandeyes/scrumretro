@@ -18,7 +18,12 @@
           v-for="post in column.posts"
           :key="post.postId"
         >
-          <ViewPost :post="post" :masked="maskPosts" />
+          <ViewPost
+            :post="post"
+            :masked="maskPosts"
+            :adminMode="adminMode"
+            :onPostDeleted="onPostDeleted"
+          />
         </div>
         <h3 class="no-posts" v-if="noPosts">No posts</h3>
       </div>
@@ -56,6 +61,10 @@ export default Vue.extend({
       type: Function as PropType<(columnId: string) => void>,
       default: () => {},
     },
+    onPostDeleted: {
+      type: Function as PropType<(postId: string) => void>,
+      default: () => {},
+    },
   },
   data: () => ({
     maskPosts: false,
@@ -71,7 +80,7 @@ export default Vue.extend({
     },
     onMaskPostsChanged(maskPosts: boolean) {
       this.maskPosts = maskPosts;
-    }
+    },
   },
 });
 </script>
