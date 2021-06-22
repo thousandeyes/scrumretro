@@ -93,7 +93,7 @@ export default Vue.extend({
   padding-top: calc(10px / 2);
   height: 100%;
   border-radius: 3px;
-  border: 1px solid grey;
+  border: 1px solid #ddd;
   overflow-y: auto;
 }
 

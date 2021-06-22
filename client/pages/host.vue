@@ -202,6 +202,10 @@ interface State {
   flex-basis: 100%;
 }
 
+.top-bar {
+  flex-shrink: 0;
+}
+
 .sync-notes {
   height: auto;
   flex-basis: 100px;

@@ -9,11 +9,7 @@
         :participant="post.participant"
       />
       <span class="post-content"> {{ post.text }} </span>
-      <button
-        v-if="!adminMode"
-        class="delete-post-btn"
-        @click="() => onPostDeleted(post.postId)"
-      >
+      <button class="delete-post-btn" @click="() => onPostDeleted(post.postId)">
         ❌
       </button>
     </template>

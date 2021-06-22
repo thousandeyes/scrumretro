@@ -1,16 +1,17 @@
 <template>
   <div class="top-bar">
-    <span class="room-label">
-      <strong>Connected:</strong> {{ room.connected || "-" }}
+    <span class="room-details"></span>
+    <span class="room-details">
+      <span class="label">ROOM:</span> {{ room.roomName || "-" }}
     </span>
-    <span class="room-label">
-      <strong>Persistent ID:</strong> {{ room.persistentId || "-" }}
-      <button v-if="room.persistentId" @click="resetPersistentId">
-        ❌
-      </button>
-    </span>
-    <span class="room-label">
-      <strong>Room name:</strong> {{ room.roomName || "-" }}
+
+    <span class="room-details">
+      <template v-if="room.connected">
+        📶 Connected
+      </template>
+      <template v-else>
+        🟥 NOT Connected
+      </template>
     </span>
   </div>
 </template>
@@ -38,9 +39,15 @@ export default Vue.extend({
 
 <style scoped>
 .top-bar {
-  height: 50px;
-  padding: 5px;
-  border-bottom: 1px solid grey;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.room-details .label {
+  font-weight: bold;
+  color: grey;
 }
 
 button {
