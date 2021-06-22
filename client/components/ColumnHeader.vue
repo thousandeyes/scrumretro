@@ -1,12 +1,14 @@
 <template>
   <div class="column-header">
+    <div class="heading-form">
     <h2 v-if="!edit" :title="column.columnName">{{ column.columnName }}</h2>
     <form v-else @submit.prevent="onEditToggled" novalidate>
       <input v-model="columnNameEditing" class="column-name-input" />
     </form>
+    <button v-if="adminMode" class="rename-button" @click="onEditToggled">✏️</button>
+    </div>
     <div v-if="adminMode" class="column-admin-buttons">
       <label class="mask-posts-label"><input type="checkbox" v-model="maskPosts" /> Mask posts</label>
-      <button @click="onEditToggled">✏️</button>
       <button @click="onOpenToggled">
         <template v-if="column.isOpen"> 🔇 </template>
         <template v-else> 🎤 </template>
@@ -94,6 +96,7 @@ export default Vue.extend({
   margin-inline-start: 0px;
   margin-inline-end: 0px;
   font-weight: bold;
+  line-height: 1;
 }
 
 .column-name-input {
@@ -118,5 +121,16 @@ button {
 
 .mask-posts-label {
   margin-right: auto;
+}
+
+.heading-form {
+  display: flex;
+  align-items: baseline;
+}
+
+.rename-button {
+  padding: 10px 5px;
+  position: relative;
+  top: -5px;
 }
 </style>
