@@ -6,6 +6,7 @@ import { saveColumn, findColumnsByRoomName } from "../../db/columns";
 import { findParticipantsByRoomName } from "../../db/participants";
 import { findPostsByColumnId } from "../../db/posts";
 import { findRoomByPersistentId } from "../../db/rooms";
+import columnsUpdateService from "../../service/columnsUpdateService";
 import { getDefaultEmptyColumn } from "../../utils/defaultColumns";
 import { mapColumnsToView, mapPostsToView } from "../../utils/mappers";
 import { respondToWebsocket, sendToWebsocket } from "../../utils/websockets";
@@ -58,15 +59,10 @@ async function addColumn(
   const viewPosts = mapPostsToView(posts, participants);
   const viewColumns = mapColumnsToView(columns, viewPosts);
 
-  await respondToWebsocket(client, event, {
-    type: MessageType.COLUMNS_UPDATED,
-    columns: viewColumns
-  });
-
-  for (const participant of participants) {
-    await sendToWebsocket(client, participant.connection_id, {
-      type: MessageType.COLUMNS_UPDATED,
-      columns: viewColumns
-    });
-  }
+  await columnsUpdateService.sendColumnUpdatedMessages(
+    client,
+    room.connection_id,
+    participants,
+    viewColumns
+  );
 }

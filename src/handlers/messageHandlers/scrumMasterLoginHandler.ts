@@ -59,6 +59,15 @@ async function joinRoomAsScrumMaster(
       roomName: room.room_name,
       columns: mapColumnsToView(columns, viewPosts)
     });
+
+    for (const participant of participants) {
+      await respondToWebsocket(client, event, {
+        type: MessageType.PARTICIPANT_JOINED,
+        roomName: room.room_name,
+        persistentId: participant.persistent_id,
+        participantName: participant.participant_name,
+      });
+    }
   } else {
     console.log("creating new room (no persistent room found)");
     room = {
