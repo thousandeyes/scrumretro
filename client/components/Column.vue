@@ -6,6 +6,7 @@
       :onColumnDeleted="onColumnDeleted"
       :adminMode="adminMode"
       :onColumnRenamed="onColumnRenamed"
+      :onMaskPostsChanged="onMaskPostsChanged"
     />
     <div class="column-container">
       <div v-if="!adminMode && column.isOpen" class="post-input column-item">
@@ -17,7 +18,7 @@
           v-for="post in column.posts"
           :key="post.postId"
         >
-          <ViewPost :post="post" />
+          <ViewPost :post="post" :masked="maskPosts" />
         </div>
         <h3 class="no-posts" v-if="noPosts">No posts</h3>
       </div>
@@ -39,31 +40,39 @@ export default Vue.extend({
     adminMode: { type: Boolean, default: true },
     onPostSubmit: {
       type: Function as PropType<(columnId: string, content: string) => void>,
-      default: () => {}
+      default: () => {},
     },
     onColumnOpened: {
       type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
-      default: () => {}
+      default: () => {},
     },
     onColumnRenamed: {
-      type: Function as PropType<(columnId: string, columnName: string) => void>,
-      default: () => {}
+      type: Function as PropType<
+        (columnId: string, columnName: string) => void
+      >,
+      default: () => {},
     },
     onColumnDeleted: {
       type: Function as PropType<(columnId: string) => void>,
-      default: () => {}
-    }
+      default: () => {},
+    },
   },
+  data: () => ({
+    maskPosts: false,
+  }),
   computed: {
     noPosts() {
       return this.column.posts.length === 0;
-    }
+    },
   },
   methods: {
     onPost(text: string) {
       this.onPostSubmit(this.column.columnId, text);
+    },
+    onMaskPostsChanged(maskPosts: boolean) {
+      this.maskPosts = maskPosts;
     }
-  }
+  },
 });
 </script>
 

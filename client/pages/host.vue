@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="host-page">
     <RoomDetails :persistentIdKey="persistentIdKey" :room="room" />
     <ViewColumns
       :columns="room.columns"
@@ -13,6 +13,7 @@
       :persistentIdKey="persistentIdKey"
       :onSync="onSyncNotes"
       :state="syncNotesState"
+      class="sync-notes"
     />
   </div>
 </template>
@@ -146,3 +147,20 @@ interface State {
   };
 }
 </script>
+
+<style scoped>
+.host-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.view-columns {
+  flex: 1 0;
+}
+
+.sync-notes {
+  height: auto;
+  flex-basis: 100px;
+}
+</style>

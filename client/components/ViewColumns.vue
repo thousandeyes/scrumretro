@@ -34,33 +34,34 @@ export default Vue.extend({
     onNewColumn: { type: Function as PropType<() => void>, default: () => {} },
     onPostSubmit: {
       type: Function as PropType<(columnId: string, content: string) => void>,
-      default: () => {}
+      default: () => {},
     },
     onColumnOpened: {
       type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
-      default: () => {}
+      default: () => {},
     },
-        onColumnRenamed: {
-      type: Function as PropType<(columnId: string, columnName: string) => void>,
-      default: () => {}
+    onColumnRenamed: {
+      type: Function as PropType<
+        (columnId: string, columnName: string) => void
+      >,
+      default: () => {},
     },
     onColumnDeleted: {
       type: Function as PropType<(columnId: string) => void>,
-      default: () => {}
-    }
+      default: () => {},
+    },
   },
   computed: {
     noColumns() {
       return this.columns.length === 0;
-    }
-  }
+    },
+  },
 });
 </script>
 
 <style scoped>
 .view-columns {
   overflow: auto;
-  height: calc(100vh - 50px);
   display: flex;
   justify-content: center;
   align-items: stretch;

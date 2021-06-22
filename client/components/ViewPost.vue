@@ -1,5 +1,8 @@
 <template>
-  <div class="view-post">
+  <div v-if="masked" class="view-post">
+    <em>Comments are masked</em>
+  </div>
+  <div v-else class="view-post">
     {{ post.text }}
   </div>
 </template>
@@ -10,10 +13,9 @@ import Post from "../models/Post";
 
 export default Vue.extend({
   props: {
-    post: {
-      type: Object as PropType<Post>
-    }
-  }
+    post: { type: Object as PropType<Post> },
+    masked: { type: Boolean, default: false },
+  },
 });
 </script>
 

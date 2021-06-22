@@ -2,20 +2,17 @@
   <div class="column-header">
     <h2 v-if="!edit" :title="column.columnName">{{ column.columnName }}</h2>
     <form v-else @submit.prevent="onEditToggled" novalidate>
-      <input v-model="columnNameEditing" />
+      <input v-model="columnNameEditing" class="column-name-input" />
     </form>
-    <span v-if="adminMode" class="column-admin-buttons">
+    <div v-if="adminMode" class="column-admin-buttons">
+      <label class="mask-posts-label"><input type="checkbox" v-model="maskPosts" /> Mask posts</label>
       <button @click="onEditToggled">✏️</button>
       <button @click="onOpenToggled">
-        <template v-if="column.isOpen">
-          🔇
-        </template>
-        <template v-else>
-          🎤
-        </template>
+        <template v-if="column.isOpen"> 🔇 </template>
+        <template v-else> 🎤 </template>
       </button>
       <button @click="deleteColumn">❌</button>
-    </span>
+    </div>
   </div>
 </template>
 
@@ -30,21 +27,28 @@ export default Vue.extend({
     adminMode: { type: Boolean, default: true },
     onColumnOpened: {
       type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
-      default: () => {}
+      default: () => {},
     },
     onColumnRenamed: {
-      type: Function as PropType<(columnId: string, columnName: string) => void>,
-      default: () => {}
+      type: Function as PropType<
+        (columnId: string, columnName: string) => void
+      >,
+      default: () => {},
     },
     onColumnDeleted: {
       type: Function as PropType<(columnId: string) => void>,
-      default: () => {}
+      default: () => {},
+    },
+    onMaskPostsChanged: {
+      type: Function as PropType<(maskPosts: boolean) => void>,
+      default: () => {},
     },
   },
-  data(): { edit: boolean, columnNameEditing: string } {
+  data(): { edit: boolean; columnNameEditing: string; maskPosts: boolean } {
     return {
       edit: false,
       columnNameEditing: this.column.columnName,
+      maskPosts: false,
     };
   },
   watch: {
@@ -52,7 +56,13 @@ export default Vue.extend({
       this.columnNameEditing = newColumn.columnName;
     },
     columnNameEditing(columnName: string) {
-      this.debouncedOnColumnRenamed(this.column.columnId, this.columnNameEditing);
+      this.debouncedOnColumnRenamed(
+        this.column.columnId,
+        this.columnNameEditing
+      );
+    },
+    maskPosts(maskPosts: boolean) {
+      this.onMaskPostsChanged(maskPosts);
     },
   },
   mounted() {
@@ -68,7 +78,7 @@ export default Vue.extend({
     deleteColumn() {
       this.onColumnDeleted(this.column.columnId);
     },
-  }
+  },
 });
 </script>
 
@@ -86,7 +96,7 @@ export default Vue.extend({
   font-weight: bold;
 }
 
-input {
+.column-name-input {
   padding: 1px 2px;
   font-size: 1.5em;
   margin-block-start: 0.83em;
@@ -102,8 +112,11 @@ button {
   background: transparent;
 }
 
-.column-header {
+.column-admin-buttons {
   display: flex;
-  align-items: baseline;
+}
+
+.mask-posts-label {
+  margin-right: auto;
 }
 </style>
