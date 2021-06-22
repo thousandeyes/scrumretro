@@ -3,5 +3,7 @@ export default interface Room {
   created_date: number;
   connection_id: string;
   persistent_id: string;
-  jira_token?: string;
+
+  atlassian_username?: string;
+  atlassian_token?: string;
 }

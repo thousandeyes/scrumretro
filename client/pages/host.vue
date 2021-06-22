@@ -13,6 +13,13 @@
         :onPostDeleted="onPostDeleted"
       />
     </div>
+
+    <AddAtlassianToken
+      class="add-token"
+      :onTokenAdd="onAddAtlassianToken"
+      :tokenExists="tokenExists"
+    />
+
     <SyncNotes
       class="sync-notes"
       :onSync="onSyncNotes"
@@ -28,6 +35,7 @@ import { MessageType, ServerMessage } from "../../messages";
 import ViewParticipants from "../components/ViewParticipants.vue";
 import ViewColumns from "../components/ViewColumns.vue";
 import RoomDetails from "../components/RoomDetails.vue";
+import AddAtlassianToken from "../components/AddAtlassianToken.vue"
 import SyncNotes from "../components/SyncNotes.vue";
 import { ROOM_MODE } from "../models/Room";
 
@@ -36,14 +44,15 @@ ViewParticipants;
 const PERSISTENT_ID_KEY = "persistentId";
 
 export default Vue.extend({
-  components: { RoomDetails, ViewColumns, SyncNotes, ViewParticipants },
+  components: { RoomDetails, ViewColumns, AddAtlassianToken, SyncNotes, ViewParticipants },
   data(): State {
     return {
       persistentIdKey: PERSISTENT_ID_KEY,
       syncNotesState: {
         message: "",
         confluencePageUrl: ""
-      }
+      },
+      tokenExists : false
     };
   },
   mounted() {
@@ -86,6 +95,9 @@ export default Vue.extend({
         case MessageType.PARTICIPANT_JOINED:
         case MessageType.POST_DELETED:
           this.$store.commit(`room/${message.type}`, message);
+          break;
+        case MessageType.ATLASSIAN_TOKEN_ADDED:
+          this.tokenExists = message.result;
           break;
         case MessageType.CONFLUENCE_NOTES_SYNCED:
           const { response, confluencePageUrl } = message;
@@ -131,8 +143,16 @@ export default Vue.extend({
           persistentId: this.room.persistentId
         })
       );
-
-      // TODO: Update UI
+    },
+    onAddAtlassianToken(username: string, token: string) {
+      this.socket.send(
+        JSON.stringify({
+          type: MessageType.ATLASSIAN_TOKEN_ADD,
+          persistentId: this.room.persistentId,
+          username,
+          token
+        })
+      );
     },
     onColumnRenamed(columnId: string, columnName: string) {
       this.socket.send(
@@ -162,6 +182,7 @@ interface State {
     message: string;
     confluencePageUrl?: string;
   };
+  tokenExists : boolean;
 }
 </script>
 

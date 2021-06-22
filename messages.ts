@@ -8,6 +8,8 @@ export enum MessageType {
   SCRUM_MASTER_LOGIN = "SCRUM_MASTER_LOGIN",
   SCRUM_MASTER_ADD_COLUMN = "SCRUM_MASTER_ADD_COLUMN",
   COLUMNS_UPDATED = "COLUMNS_UPDATED",
+  ATLASSIAN_TOKEN_ADD = "ATLASSIAN_TOKEN_ADD",
+  ATLASSIAN_TOKEN_ADDED = "ATLASSIAN_TOKEN_ADDED",
   CONFLUENCE_NOTES_SYNC = "CONFLUENCE_NOTES_SYNC",
   CONFLUENCE_NOTES_SYNCED = "CONFLUENCE_NOTES_SYNCED",
   PERSISTENT_ID_GENERATED = "PERSISTENT_ID_GENERATED",
@@ -28,6 +30,7 @@ export type ClientMessage =
   | ScrumMasterLoginMessage
   | ScrumMasterAddColumnMessage
   | ParticipantLoginMessage
+  | AtlassianTokenAddMessage
   | ConfluenceNotesSyncMessage
   | AddPostMessage
   | ChangeColumnOpenStateMessage
@@ -43,6 +46,7 @@ export type ServerMessage =
   | ActionFailedMessage
   | ColumnsUpdatedMessage
   | InternalError
+  | AtlassianTokenAddedMessage
   | ConfluenceNotesSyncedMessage
   | PostAddedMessage
   | ColumnOpenStateChangedMessage
@@ -105,6 +109,18 @@ export interface ActionFailedMessage {
 export interface InternalError {
   type: undefined;
   message: string;
+}
+
+export interface AtlassianTokenAddMessage {
+  type: MessageType.ATLASSIAN_TOKEN_ADD;
+  persistentId: string;
+  username: string;
+  token: string;
+}
+
+export interface AtlassianTokenAddedMessage {
+  type: MessageType.ATLASSIAN_TOKEN_ADDED;
+  result: boolean;
 }
 
 export interface ConfluenceNotesSyncMessage {
