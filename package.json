@@ -26,7 +26,6 @@
   "homepage": "https://github.com/thousandeyes/scrumretro#readme",
   "dependencies": {
     "@nuxt/http": "^0.1.2",
-    "axios": "^0.21.1",
     "lodash": "^4.17.20",
     "nuxt": "^2.14.12",
     "nuxt-start": "^2.14.12",
@@ -41,6 +40,7 @@
     "@types/aws-lambda": "^8.10.64",
     "@types/aws-sdk": "^2.7.0",
     "@types/lodash": "^4.14.165",
+    "axios": "^0.21.1",
     "cross-env": "^7.0.3",
     "serverless-apigw-binary": "git+https://github.com/FLamparski/serverless-apigw-binary.git",
     "serverless-domain-manager": "^5.1.0",
