@@ -60,7 +60,8 @@ async function joinRoomAsScrumMaster(
       columns: mapColumnsToView(columns, viewPosts)
     });
 
-    for (const participant of participants) {
+    const onlineParticipants = participants.filter(p => p.online);
+    for (const participant of onlineParticipants) {
       await respondToWebsocket(client, event, {
         type: MessageType.PARTICIPANT_JOINED,
         roomName: room.room_name,
