@@ -209,13 +209,15 @@ function mapColumnsToView(
     }
     postsByColumnId[post.columnId].push(post);
   }
-  return columns.map(dbColumn => ({
-    columnId: dbColumn.column_id,
-    columnName: dbColumn.column_name,
-    isOpen: dbColumn.is_open,
-    posts: postsByColumnId[dbColumn.column_id] || [],
-    createdDate: dbColumn.created_date,
-  }));
+  return columns
+    .map(dbColumn => ({
+      columnId: dbColumn.column_id,
+      columnName: dbColumn.column_name,
+      isOpen: dbColumn.is_open,
+      posts: postsByColumnId[dbColumn.column_id] || [],
+      createdDate: dbColumn.created_date
+    }))
+    .sort(({ createdDate: dateA }, { createdDate: dateB }) => dateA - dateB);
 }
 
 function mapPostsToView(
