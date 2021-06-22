@@ -10,14 +10,17 @@ export enum MessageType {
   CONFLUENCE_NOTES_SYNCED = "CONFLUENCE_NOTES_SYNCED",
   PERSISTENT_ID_GENERATED = "PERSISTENT_ID_GENERATED",
   ROOM_JOINED = "ROOM_JOINED",
-  ACTION_FAILED = "ACTION_FAILED"
+  ACTION_FAILED = "ACTION_FAILED",
+  ADD_POST = "ADD_POST",
+  POST_ADDED = "POST_ADDED"
 }
 
 export type ClientMessage =
   | ScrumMasterLoginMessage
   | ScrumMasterAddColumnMessage
   | ParticipantLoginMessage
-  | ConfluenceNotesSyncMessage;
+  | ConfluenceNotesSyncMessage
+  | AddPostMessage;
 
 export type ServerMessage =
   | PersistentIdGeneratedMessage
@@ -26,7 +29,8 @@ export type ServerMessage =
   | ActionFailedMessage
   | ColumnsUpdatedMessage
   | InternalError
-  | ConfluenceNotesSyncedMessage;
+  | ConfluenceNotesSyncedMessage
+  | PostAddedMessage;
 
 export interface ScrumMasterLoginMessage {
   type: MessageType.SCRUM_MASTER_LOGIN;
@@ -88,4 +92,20 @@ export interface ConfluenceNotesSyncedMessage {
   type: MessageType.CONFLUENCE_NOTES_SYNCED;
   response: string;
   confluencePageUrl?: string;
+}
+
+export interface AddPostMessage {
+  type: MessageType.ADD_POST;
+  participantId: string;
+  columnId: string;
+  roomName: string;
+  content: string;
+}
+
+export interface PostAddedMessage {
+  type: MessageType.POST_ADDED;
+  participantId: string;
+  columnId: string;
+  roomName: string;
+  content: string;
 }
