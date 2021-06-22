@@ -3,4 +3,5 @@ export default interface Column {
   column_id: string;
   column_name: string;
   is_open: boolean;
+  created_date: number;
 }

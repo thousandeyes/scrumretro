@@ -34,7 +34,8 @@ export default Vue.extend({
         columnId: id,
         columnName: id,
         isOpen: true,
-        posts: []
+        posts: [],
+        createdDate: Date.now() / 1000,
       }
     ];
     return {

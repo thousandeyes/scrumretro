@@ -32,7 +32,7 @@ export async function saveColumn(column: Column): Promise<void> {
       TableName: TABLE_NAME,
       Item: {
         ...column,
-        created_at: Date.now() / 1000
+        created_date: Date.now() / 1000
       }
     })
     .promise();

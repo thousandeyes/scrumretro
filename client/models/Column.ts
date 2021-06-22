@@ -5,4 +5,5 @@ export default interface Column {
   columnName: string;
   isOpen: boolean;
   posts: Post[];
+  createdDate: number;
 }

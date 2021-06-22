@@ -214,6 +214,7 @@ function mapColumnsToView(
     columnName: dbColumn.column_name,
     isOpen: dbColumn.is_open,
     posts: postsByColumnId[dbColumn.column_id] || [],
+    createdDate: dbColumn.created_date,
   }));
 }
 
