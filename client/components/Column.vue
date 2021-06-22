@@ -31,7 +31,8 @@ export default Vue.extend({
   components: { ColumnHeader, InputPost, ViewPost },
   props: {
     column: { type: Object as PropType<Column>, required: true },
-    adminMode: { type: Boolean, default: true }
+    adminMode: { type: Boolean, default: true },
+    onPostSubmit: { type: Function as PropType<(columnId: string, content: string) => void>, required: true },
   },
   computed: {
     noPosts() {
@@ -39,27 +40,11 @@ export default Vue.extend({
     }
   },
   methods: {
-    onPost(text) {
-      // TODO: send post to server
-      // TEMP post creation
-      const post: Post = {
-        postId: `POST: ${randomId()}`,
-        text: text,
-        participant: {
-          persistentId: "THIS ID!",
-          participantName: "RUUUUIIIII"
-        },
-        submittedDate: Date.now() / 1000,
-        columnId: this.column.columnId,
-      };
-      this.column.posts.unshift(post);
+    onPost(text: string) {
+      this.onPostSubmit(this.column.columnId, text);
     }
   }
 });
-
-function randomId() {
-  return Math.floor(Math.random() * 10000000000);
-}
 </script>
 
 <style scoped>

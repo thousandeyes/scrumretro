@@ -21,6 +21,8 @@ import ViewColumns from "../components/ViewColumns.vue";
 import RoomDetails from "../components/RoomDetails.vue";
 import SyncNotes from "../components/SyncNotes.vue";
 import Room from "../models/Room";
+import Column from "../models/Column";
+import { keyBy } from "lodash";
 
 const PERSISTENT_ID_KEY = "persistentId";
 
@@ -77,8 +79,7 @@ export default Vue.extend({
           break;
         }
         case MessageType.COLUMNS_UPDATED: {
-          const { columns } = message;
-          Object.assign(this.room, { columns });
+          this.onColumnsUpdated(message.columns);
           break;
         }
         case MessageType.CONFLUENCE_NOTES_SYNCED:
@@ -102,6 +103,13 @@ export default Vue.extend({
           persistentId: this.room.persistentId
         })
       );
+    },
+    onColumnsUpdated(newColumnDefs: Column[]): void {
+      const columnsById = keyBy(this.room.columns, 'columnId');
+      this.room.columns = newColumnDefs.map(colDef => ({
+        ...colDef,
+        posts: columnsById[colDef.columnId] && columnsById[colDef.columnId].posts || [],
+      }));
     },
     onSyncNotes() {
       this.socket.send(

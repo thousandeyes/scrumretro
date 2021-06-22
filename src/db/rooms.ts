@@ -77,7 +77,7 @@ export async function saveRoom(room: Partial<Room>): Promise<void> {
     .put({
       TableName: TABLE_NAME,
       Item: {
-        created_at: Date.now(),
+        updated_date: Date.now(),
         ...room
       }
     })

@@ -3,7 +3,7 @@
     <RoomDetails :persistentIdKey="persistentIdKey" :room="room" />
     <div v-if="alertMsg" class="alert">{{ alertMsg }}</div>
     <div v-if="room.roomName != null" class="play">
-      <ViewColumns :columns="columns" />
+      <ViewColumns :columns="room.columns" :onPostSubmit="onPostSubmit" />
     </div>
     <JoinRoom v-else :onJoinRoomClick="onJoinRoomClick" />
   </div>
@@ -16,6 +16,7 @@ import ViewColumns from "../components/ViewColumns.vue";
 import JoinRoom from "../components/JoinRoom.vue";
 import RoomDetails from "../components/RoomDetails.vue";
 import {
+  AddPostMessage,
   MessageType,
   ParticipantLoginMessage,
   RoomJoinedMessage,
@@ -41,6 +42,7 @@ export default Vue.extend({
     return {
       persistentIdKey: PERSISTENT_ID_KEY,
       room: {
+        roomName: undefined,
         connected: false,
         persistentId: undefined,
         columns,
@@ -98,6 +100,16 @@ export default Vue.extend({
         participantName,
         roomName,
         persistentId: this.room.persistentId
+      };
+      this.socket.send(JSON.stringify(message));
+    },
+    onPostSubmit(columnId: string, content: string): void {
+      const message: AddPostMessage = {
+        type: MessageType.ADD_POST,
+        participantId: this.room.persistentId,
+        roomName: this.room.roomName,
+        columnId,
+        content,
       };
       this.socket.send(JSON.stringify(message));
     }

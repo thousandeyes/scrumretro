@@ -5,6 +5,7 @@
       :key="column.columnId"
       :column="column"
       :adminMode="adminMode"
+      :onPostSubmit="onPostSubmit"
     />
     <div v-if="adminMode">
       <div class="manage-columns-btns">
@@ -24,7 +25,8 @@ export default Vue.extend({
   props: {
     columns: { type: Array as PropType<Column[]> },
     adminMode: { type: Boolean, default: false },
-    onNewColumn: { type: Function as PropType<() => void>, default: () => {} }
+    onNewColumn: { type: Function as PropType<() => void>, default: () => {} },
+    onPostSubmit: { type: Function as PropType<(columnId: string, content: string) => void>, required: true },
   }
 });
 </script>

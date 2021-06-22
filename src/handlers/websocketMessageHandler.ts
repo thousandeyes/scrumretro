@@ -2,6 +2,7 @@ import { ApiGatewayManagementApi } from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import {
+  AddPostMessage,
   ClientMessage,
   MessageType,
   ParticipantLoginMessage,
@@ -20,7 +21,7 @@ import {
   getDefaultColumns,
   getDefaultEmptyColumn
 } from "../utils/defaultColumns";
-import { findColumnsByRoomName, saveColumn, saveColumns } from "../db/columns";
+import { findColumnByColumnIdAndRoomName, findColumnsByRoomName, saveColumn, saveColumns } from "../db/columns";
 import DbColumn from "../models/Column";
 import DbPost from "../models/Post";
 import DbParticipant from "../models/Participant";
@@ -29,7 +30,8 @@ import ViewPost from "../../client/models/Post";
 import ViewParticipant from "../../client/models/Participant";
 import {
   findPostsByRoomName,
-  findPostsByRoomNameAndParticipantId
+  findPostsByRoomNameAndParticipantId,
+  savePost
 } from "../db/posts";
 import { keyBy } from "lodash";
 
@@ -92,6 +94,10 @@ export default async function(
         response: pageUrl ? "OK" : "Failed to sync notes",
         confluencePageUrl: pageUrl
       });
+      return { statusCode: 200, body: "handled" };
+    }
+    case MessageType.ADD_POST: {
+      await addPost(client, event, message);
       return { statusCode: 200, body: "handled" };
     }
     default:
@@ -171,6 +177,10 @@ async function joinRoomAsScrumMaster(
     const posts = await findPostsByRoomName(room.room_name);
     const participants = await findParticipantsByRoomName(room.room_name);
     const viewPosts = mapPostsToView(posts, participants);
+
+    console.log(`Updating ${room.room_name} connection_id from ${room.connection_id} to ${event.requestContext.connectionId}`);
+    room.connection_id = event.requestContext.connectionId!;
+    await saveRoom(room);
 
     await respondToWebsocket(client, event, {
       type: MessageType.ROOM_JOINED,
@@ -322,4 +332,52 @@ async function addColumn(
   });
 
   return;
+}
+
+async function addPost(
+  client: ApiGatewayManagementApi,
+  event: APIGatewayProxyEvent,
+  request: AddPostMessage
+): Promise<void> {
+  const column = await findColumnByColumnIdAndRoomName(request.columnId, request.roomName);
+  if (!column) {
+    await respondToWebsocket(client, event, {
+      type: MessageType.ACTION_FAILED,
+      request,
+      details: 'Invalid columnId or roomName',
+    });
+    return;
+  }
+
+  const room = await findRoomByName(request.roomName);
+  if (!room) {
+    await respondToWebsocket(client, event, {
+      type: MessageType.ACTION_FAILED,
+      request,
+      details: 'Room not found',
+    });
+    return;
+  }
+
+  const post: DbPost = {
+    post_id: uuidv4(),
+    column_id: request.columnId,
+    participant_id: request.participantId,
+    submitted_date: Date.now() / 1000,
+    content: request.content,
+  };
+  await savePost(post);
+
+  const participant = await findParticipantByRoomNameAndPersistentId(request.roomName, request.participantId);
+  const viewPost = mapPostsToView([post], participant ? [participant] : [])[0];
+
+  await sendToWebsocket(client, room.connection_id, {
+    type: MessageType.POST_ADDED,
+    post: viewPost,
+  });
+
+  await respondToWebsocket(client, event, {
+    type: MessageType.POST_ADDED,
+    post: viewPost,
+  });
 }

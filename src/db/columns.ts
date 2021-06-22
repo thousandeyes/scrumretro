@@ -4,6 +4,24 @@ import dynamoDb from "./dynamoDb";
 const TABLE_NAME: string = process.env.DYNAMODB_TB_COLUMNS!;
 const ROOM_NAME_IDX: string = process.env.DYNAMODB_TB_COLUMNS_IDX_ROOM_NAME!;
 
+export async function findColumnByColumnIdAndRoomName(
+    columnId: string,
+    roomName: string
+): Promise<Column | undefined> {
+    const result = await dynamoDb.query({
+        TableName: TABLE_NAME,
+        KeyConditionExpression: 'column_id = :column_id',
+        FilterExpression: 'room_name = :room_name',
+        ExpressionAttributeValues: {
+            ':column_id': columnId,
+            ':room_name': roomName,
+        },
+    }).promise();
+
+    const column: Column | undefined = result.Items![0] as any;
+    return column;
+}
+
 export async function findColumnsByRoomName(
   roomName: string
 ): Promise<Column[]> {
