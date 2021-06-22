@@ -1,32 +1,31 @@
 <template>
   <div class="column-header">
-    <h2 v-if="!edit" :title="column.columnName"> {{ column.columnName }} </h2>
+    <h2 v-if="!edit" :title="column.columnName">{{ column.columnName }}</h2>
     <form v-else @submit.prevent="onEditToggled" novalidate>
-      <input @input="onNameChanged" :value="column.columnName">
+      <input @input="onNameChanged" :value="column.columnName" />
     </form>
     <span v-if="adminMode" class="column-admin-buttons">
-        <button @click="onEditToggled">✏️</button>
-        <button @click="onOpenToggled">
-          <template v-if="column.isOpen">
-            🔇
-          </template>
-          <template v-else>
-            🎤
-          </template>
-        </button>
+      <button @click="onEditToggled">✏️</button>
+      <button @click="onOpenToggled">
+        <template v-if="column.isOpen">
+          🔇
+        </template>
+        <template v-else>
+          🎤
+        </template>
+      </button>
     </span>
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
-import Column from '../models/Column';
-
+import Vue, { PropType } from "vue";
+import Column from "../models/Column";
 
 export default Vue.extend({
   props: {
     column: { type: Object as PropType<Column>, required: true },
-    adminMode: { type: Boolean, default: true },
+    adminMode: { type: Boolean, default: true }
   },
   data(): { edit: boolean } {
     return { edit: false };
@@ -43,13 +42,11 @@ export default Vue.extend({
       this.column.columnName = target.value;
       // TODO: update name on the server
     }
-  },
+  }
 });
 </script>
 
 <style scoped>
-
-
 .column-header h2 {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -83,5 +80,4 @@ button {
   display: flex;
   align-items: baseline;
 }
-
 </style>

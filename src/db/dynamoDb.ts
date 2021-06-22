@@ -1,2 +1,2 @@
-import { DynamoDB } from 'aws-sdk';
+import { DynamoDB } from "aws-sdk";
 export default new DynamoDB.DocumentClient();

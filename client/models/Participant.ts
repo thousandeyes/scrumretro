@@ -1,4 +1,4 @@
 export default interface Participant {
-    persistentId: string;
-    participantName: string;
+  persistentId: string;
+  participantName: string;
 }

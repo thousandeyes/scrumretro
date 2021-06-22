@@ -5,35 +5,38 @@
       <div v-if="!adminMode && column.isOpen" class="post-input column-item">
         <InputPost :onPost="onPost" />
       </div>
-      <div class="post-display"> 
-        <div class="column-item" v-for="post in column.posts" :key="post.postId"> 
+      <div class="post-display">
+        <div
+          class="column-item"
+          v-for="post in column.posts"
+          :key="post.postId"
+        >
           <ViewPost :post="post" />
         </div>
-        <h3 class="no-posts" v-if="noPosts"> No posts </h3>
+        <h3 class="no-posts" v-if="noPosts">No posts</h3>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
-import InputPost from './InputPost.vue';
-import ViewPost from './ViewPost.vue';
-import ColumnHeader from './ColumnHeader.vue';
-import Column from '../models/Column';
-import Post from '../models/Post';
-
+import Vue, { PropType } from "vue";
+import InputPost from "./InputPost.vue";
+import ViewPost from "./ViewPost.vue";
+import ColumnHeader from "./ColumnHeader.vue";
+import Column from "../models/Column";
+import Post from "../models/Post";
 
 export default Vue.extend({
   components: { ColumnHeader, InputPost, ViewPost },
   props: {
     column: { type: Object as PropType<Column>, required: true },
-    adminMode: { type: Boolean, default: true },
+    adminMode: { type: Boolean, default: true }
   },
   computed: {
     noPosts() {
       return this.column.posts.length === 0;
-    },
+    }
   },
   methods: {
     onPost(text) {
@@ -44,12 +47,12 @@ export default Vue.extend({
         text: text,
         participant: {
           persistentId: "THIS ID!",
-          participantName: "RUUUUIIIII",
+          participantName: "RUUUUIIIII"
         },
-        submittedDate: Date.now()/1000
+        submittedDate: Date.now() / 1000
       };
       this.column.posts.unshift(post);
-    },
+    }
   }
 });
 
@@ -58,12 +61,11 @@ function randomId() {
 }
 </script>
 
-
 <style scoped>
 .column {
   display: flex;
   flex-flow: column nowrap;
-  width:  350px;
+  width: 350px;
   padding: 10px;
 }
 
@@ -72,7 +74,6 @@ function randomId() {
   height: 100%;
   border-radius: 3px;
   border: 1px solid grey;
-  overflow-y: auto;
   overflow-y: auto;
 }
 

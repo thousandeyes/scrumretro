@@ -5,7 +5,7 @@
     <div v-if="room.roomName != null" class="play">
       <ViewColumns :columns="columns" />
     </div>
-    <JoinRoom v-else :onJoinRoomClick="onJoinRoomClick"/>
+    <JoinRoom v-else :onJoinRoomClick="onJoinRoomClick" />
   </div>
 </template>
 
@@ -14,12 +14,12 @@ import Vue from "vue";
 import Column from "../models/Column";
 import ViewColumns from "../components/ViewColumns.vue";
 import JoinRoom from "../components/JoinRoom.vue";
-import RoomDetails from '../components/RoomDetails.vue';
+import RoomDetails from "../components/RoomDetails.vue";
 import {
   MessageType,
   ParticipantLoginMessage,
   RoomJoinedMessage,
-  ServerMessage,
+  ServerMessage
 } from "../../messages";
 import Room from "../models/Room";
 
@@ -29,12 +29,13 @@ export default Vue.extend({
   components: { RoomDetails, ViewColumns, JoinRoom },
   data(): State {
     const id = `Column ${randomId()}`;
-    const columns: Column[] = [{
+    const columns: Column[] = [
+      {
         columnId: id,
         columnName: id,
         isOpen: true,
-        posts: [],
-      },
+        posts: []
+      }
     ];
     return {
       persistentIdKey: PERSISTENT_ID_KEY,
@@ -42,9 +43,9 @@ export default Vue.extend({
         connected: false,
         persistentId: undefined,
         columns,
-        participants: [],
+        participants: []
       },
-      alertMsg: undefined,
+      alertMsg: undefined
     };
   },
   mounted() {
@@ -55,7 +56,7 @@ export default Vue.extend({
 
     this.socket = new WebSocket(this.$config.websocketUrl);
     this.socket.onopen = () => this.socketOpened();
-    this.socket.onmessage = (event) => this.onSocketMessage(event);
+    this.socket.onmessage = event => this.onSocketMessage(event);
   },
   beforeDestroy() {
     this.socket.close();
@@ -66,8 +67,8 @@ export default Vue.extend({
     },
     onSocketMessage(event: MessageEvent) {
       const message: ServerMessage = JSON.parse(event.data);
-      if (message.type ==null) {
-        this.alertMsg = 'Whoops! Something went wrong, please try again later.';
+      if (message.type == null) {
+        this.alertMsg = "Whoops! Something went wrong, please try again later.";
         return;
       }
       switch (message.type) {
@@ -95,11 +96,11 @@ export default Vue.extend({
         type: MessageType.PARTICIPANT_LOGIN,
         participantName,
         roomName,
-        persistentId: this.room.persistentId,
+        persistentId: this.room.persistentId
       };
       this.socket.send(JSON.stringify(message));
-    },
-  },
+    }
+  }
 });
 
 interface State {

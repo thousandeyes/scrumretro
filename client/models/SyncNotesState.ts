@@ -1,4 +1,4 @@
 export default interface SyncNotesState {
-    message: string;
-    confluencePageUrl: string;
+  message: string;
+  confluencePageUrl: string;
 }

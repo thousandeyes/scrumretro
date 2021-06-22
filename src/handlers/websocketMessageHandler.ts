@@ -10,14 +10,20 @@ import {
   ServerMessage
 } from "../../messages";
 import { findRoomByName, findRoomByPersistentId, saveRoom } from "../db/rooms";
-import { findParticipantByRoomNameAndPersistentId, saveRoomParticipant } from "../db/participants";
+import {
+  findParticipantByRoomNameAndPersistentId,
+  saveRoomParticipant
+} from "../db/participants";
 import { getRoomName } from "../utils/roomName";
-import { getDefaultColumns, getDefaultEmptyColumn } from "../utils/defaultColumns";
+import {
+  getDefaultColumns,
+  getDefaultEmptyColumn
+} from "../utils/defaultColumns";
 import { findColumnsByRoomName, saveColumn, saveColumns } from "../db/columns";
 import DbColumn from "../models/Column";
 import ViewColumn from "../../client/models/Column";
 
-export default async function (
+export default async function(
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
   const client = new ApiGatewayManagementApi({
@@ -65,7 +71,7 @@ export default async function (
       if (persistentId == null) {
         respondToWebsocket(client, event, {
           type: MessageType.CONFLUENCE_NOTES_SYNCED,
-          response: 'Unknown room to sync notes from'
+          response: "Unknown room to sync notes from"
         });
         return { statusCode: 200, body: "handled" };
       }
@@ -73,7 +79,7 @@ export default async function (
       const pageUrl = await syncConfluenceNotes(client, persistentId);
       respondToWebsocket(client, event, {
         type: MessageType.CONFLUENCE_NOTES_SYNCED,
-        response: pageUrl ? 'OK' : 'Failed to sync notes',
+        response: pageUrl ? "OK" : "Failed to sync notes",
         confluencePageUrl: pageUrl
       });
       return { statusCode: 200, body: "handled" };
@@ -125,15 +131,17 @@ async function joinRoom(
     });
   }
 
-  await client.postToConnection({
-    ConnectionId: room.connection_id,
-    Data: JSON.stringify({
-      type: MessageType.PARTICIPANT_JOINED,
-      roomName: wsMessage.roomName,
-      participantName: wsMessage.participantName,
-      persistentId: wsMessage.persistentId
-    }),
-  }).promise();
+  await client
+    .postToConnection({
+      ConnectionId: room.connection_id,
+      Data: JSON.stringify({
+        type: MessageType.PARTICIPANT_JOINED,
+        roomName: wsMessage.roomName,
+        participantName: wsMessage.participantName,
+        persistentId: wsMessage.persistentId
+      })
+    })
+    .promise();
 }
 
 async function joinRoomAsScrumMaster(
@@ -206,21 +214,23 @@ async function respondToWebsocket<M extends ServerMessage>(
   }
 }
 
-async function syncConfluenceNotes(client: ApiGatewayManagementApi, persistentId: string): Promise<string> {
+async function syncConfluenceNotes(
+  client: ApiGatewayManagementApi,
+  persistentId: string
+): Promise<string> {
   const room = await findRoomByPersistentId(persistentId);
   if (!room) {
     return Promise.reject();
   }
 
-  return "https://confluence.com;"
+  return "https://confluence.com;";
 }
 
 async function addColumn(
   client: ApiGatewayManagementApi,
   event: APIGatewayProxyEvent,
-  request: ScrumMasterAddColumnMessage)
-: Promise<void>
-{
+  request: ScrumMasterAddColumnMessage
+): Promise<void> {
   let { persistentId } = request;
   if (persistentId == null) {
     await respondToWebsocket(client, event, {
@@ -247,7 +257,7 @@ async function addColumn(
 
   await respondToWebsocket(client, event, {
     type: MessageType.COLUMNS_UPDATED,
-    columns: mapColumnsToView(await findColumnsByRoomName(room.room_name)),
+    columns: mapColumnsToView(await findColumnsByRoomName(room.room_name))
   });
 
   return;

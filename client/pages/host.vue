@@ -34,12 +34,12 @@ export default Vue.extend({
         persistentId: undefined,
         roomName: undefined,
         columns: [],
-        participants: [],
+        participants: []
       },
       syncNotesState: {
         message: "",
-        confluencePageUrl: "",
-      },
+        confluencePageUrl: ""
+      }
     };
   },
   mounted() {
@@ -50,7 +50,7 @@ export default Vue.extend({
 
     this.socket = new WebSocket(this.$config.websocketUrl);
     this.socket.onopen = () => this.socketOpened();
-    this.socket.onmessage = (event) => this.onSocketMessage(event);
+    this.socket.onmessage = event => this.onSocketMessage(event);
   },
   beforeDestroy() {
     this.socket.close();
@@ -61,7 +61,7 @@ export default Vue.extend({
       this.socket.send(
         JSON.stringify({
           type: MessageType.SCRUM_MASTER_LOGIN,
-          persistentId: this.room.persistentId,
+          persistentId: this.room.persistentId
         })
       );
     },
@@ -99,7 +99,7 @@ export default Vue.extend({
       this.socket.send(
         JSON.stringify({
           type: MessageType.SCRUM_MASTER_ADD_COLUMN,
-          persistentId: this.room.persistentId,
+          persistentId: this.room.persistentId
         })
       );
     },
@@ -107,13 +107,13 @@ export default Vue.extend({
       this.socket.send(
         JSON.stringify({
           type: MessageType.CONFLUENCE_NOTES_SYNC,
-          persistentId: this.room.persistentId,
+          persistentId: this.room.persistentId
         })
       );
 
       // TODO: Update UI
-    },
-  },
+    }
+  }
 });
 
 interface State {
@@ -125,6 +125,3 @@ interface State {
   };
 }
 </script>
-
-<style scoped>
-</style>

@@ -3,7 +3,7 @@ import nuxtHandler from "./handlers/nuxtHandler";
 import websocketMessageHandler from "./handlers/websocketMessageHandler";
 
 export {
-    nuxtHandler,
-    websocketMessageHandler,
-    // websocketDisconnectedHandler,
+  nuxtHandler,
+  websocketMessageHandler
+  // websocketDisconnectedHandler,
 };

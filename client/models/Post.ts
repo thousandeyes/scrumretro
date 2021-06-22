@@ -1,8 +1,8 @@
-import Participant from './Participant';
+import Participant from "./Participant";
 
 export default interface Post {
-    postId: string;
-    text: string;
-    participant: Participant;
-    submittedDate: number;
+  postId: string;
+  text: string;
+  participant: Participant;
+  submittedDate: number;
 }
