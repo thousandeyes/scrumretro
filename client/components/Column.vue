@@ -32,7 +32,10 @@ export default Vue.extend({
   props: {
     column: { type: Object as PropType<Column>, required: true },
     adminMode: { type: Boolean, default: true },
-    onPostSubmit: { type: Function as PropType<(columnId: string, content: string) => void>, required: true },
+    onPostSubmit: {
+      type: Function as PropType<(columnId: string, content: string) => void>,
+      default: () => {}
+    }
   },
   computed: {
     noPosts() {

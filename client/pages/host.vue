@@ -16,13 +16,12 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { mapMutations, mapGetters } from "vuex";
 import { MessageType, ServerMessage } from "../../messages";
 import ViewColumns from "../components/ViewColumns.vue";
 import RoomDetails from "../components/RoomDetails.vue";
 import SyncNotes from "../components/SyncNotes.vue";
-import Room from "../models/Room";
-import Column from "../models/Column";
-import { keyBy } from "lodash";
+import { ROOM_MODE } from "../models/Room";
 
 const PERSISTENT_ID_KEY = "persistentId";
 
@@ -31,13 +30,6 @@ export default Vue.extend({
   data(): State {
     return {
       persistentIdKey: PERSISTENT_ID_KEY,
-      room: {
-        connected: false,
-        persistentId: undefined,
-        roomName: undefined,
-        columns: [],
-        participants: []
-      },
       syncNotesState: {
         message: "",
         confluencePageUrl: ""
@@ -45,11 +37,7 @@ export default Vue.extend({
     };
   },
   mounted() {
-    const localStorageKey = `${this.$config.stage}/${PERSISTENT_ID_KEY}`;
-    if (window.localStorage && window.localStorage[localStorageKey] != null) {
-      this.room.persistentId = window.localStorage[localStorageKey];
-    }
-
+    this.initRoomState(this.$config.stage, ROOM_MODE.HOST);
     this.socket = new WebSocket(this.$config.websocketUrl);
     this.socket.onopen = () => this.socketOpened();
     this.socket.onmessage = event => this.onSocketMessage(event);
@@ -57,9 +45,18 @@ export default Vue.extend({
   beforeDestroy() {
     this.socket.close();
   },
+  computed: {
+    ...mapGetters({
+      room: "room/getRoom"
+    })
+  },
   methods: {
+    ...mapMutations({
+      initRoomState: "room/init",
+      connected: "room/connected"
+    }),
     socketOpened() {
-      this.room.connected = true;
+      this.connected();
       this.socket.send(
         JSON.stringify({
           type: MessageType.SCRUM_MASTER_LOGIN,
@@ -71,17 +68,10 @@ export default Vue.extend({
       const message: ServerMessage = JSON.parse(event.data);
       switch (message.type) {
         case MessageType.PERSISTENT_ID_GENERATED:
-          this.savePersistentId(message.persistentId);
+        case MessageType.ROOM_JOINED:
+        case MessageType.COLUMNS_UPDATED:
+          this.$store.commit(`room/${message.type}`, message);
           break;
-        case MessageType.ROOM_JOINED: {
-          const { roomName, columns } = message;
-          Object.assign(this.room, { roomName, columns });
-          break;
-        }
-        case MessageType.COLUMNS_UPDATED: {
-          this.onColumnsUpdated(message.columns);
-          break;
-        }
         case MessageType.CONFLUENCE_NOTES_SYNCED:
           const { response, confluencePageUrl } = message;
           Object.assign(this.syncNotesState, { response, confluencePageUrl });
@@ -91,11 +81,6 @@ export default Vue.extend({
           break;
       }
     },
-    savePersistentId(persistentId: string) {
-      const localStorageKey = `${this.$config.stage}/${PERSISTENT_ID_KEY}`;
-      window.localStorage[localStorageKey] = persistentId;
-      this.room.persistentId = persistentId;
-    },
     onNewColumn() {
       this.socket.send(
         JSON.stringify({
@@ -103,13 +88,6 @@ export default Vue.extend({
           persistentId: this.room.persistentId
         })
       );
-    },
-    onColumnsUpdated(newColumnDefs: Column[]): void {
-      const columnsById = keyBy(this.room.columns, 'columnId');
-      this.room.columns = newColumnDefs.map(colDef => ({
-        ...colDef,
-        posts: columnsById[colDef.columnId] && columnsById[colDef.columnId].posts || [],
-      }));
     },
     onSyncNotes() {
       this.socket.send(
@@ -126,7 +104,6 @@ export default Vue.extend({
 
 interface State {
   persistentIdKey: string;
-  room: Room;
   syncNotesState: {
     message: string;
     confluencePageUrl?: string;
