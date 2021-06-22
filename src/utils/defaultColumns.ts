@@ -29,3 +29,12 @@ export function getDefaultColumns(roomName: string): Column[] {
         }
     ]
 }
+
+export function getDefaultEmptyColumn(roomName: string): Column {
+    return {
+        column_id: uuidv4(),
+        column_name: 'New Column',
+        room_name: roomName,
+        is_open: false,
+    };
+}

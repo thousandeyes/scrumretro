@@ -5,14 +5,15 @@ import {
   ClientMessage,
   MessageType,
   ParticipantLoginMessage,
+  ScrumMasterAddColumnMessage,
   ScrumMasterLoginMessage,
   ServerMessage
 } from "../../messages";
 import { findRoomByName, findRoomByPersistentId, saveRoom } from "../db/rooms";
 import { findParticipantByRoomNameAndPersistentId, saveRoomParticipant } from "../db/participants";
 import { getRoomName } from "../utils/roomName";
-import { getDefaultColumns } from "../utils/defaultColumns";
-import { findColumnsByRoomName, saveColumns } from "../db/columns";
+import { getDefaultColumns, getDefaultEmptyColumn } from "../utils/defaultColumns";
+import { findColumnsByRoomName, saveColumn, saveColumns } from "../db/columns";
 import DbColumn from "../models/Column";
 import ViewColumn from "../../client/models/Column";
 
@@ -53,6 +54,10 @@ export default async function (
       }
 
       await joinRoomAsScrumMaster(client, event, { ...message, persistentId });
+      return { statusCode: 200, body: "handled" };
+    }
+    case MessageType.SCRUM_MASTER_ADD_COLUMN: {
+      await addColumn(client, event, message);
       return { statusCode: 200, body: "handled" };
     }
     case MessageType.CONFLUENCE_NOTES_SYNC: {
@@ -208,4 +213,42 @@ async function syncConfluenceNotes(client: ApiGatewayManagementApi, persistentId
   }
 
   return "https://confluence.com;"
+}
+
+async function addColumn(
+  client: ApiGatewayManagementApi,
+  event: APIGatewayProxyEvent,
+  request: ScrumMasterAddColumnMessage)
+: Promise<void>
+{
+  let { persistentId } = request;
+  if (persistentId == null) {
+    await respondToWebsocket(client, event, {
+      type: MessageType.ACTION_FAILED,
+      request: request,
+      details: "Invalid persistentId"
+    });
+    return;
+  }
+
+  let room = await findRoomByPersistentId(persistentId);
+
+  if (room == null) {
+    await respondToWebsocket(client, event, {
+      type: MessageType.ACTION_FAILED,
+      request,
+      details: "Room not found for the persistent id"
+    });
+    return;
+  }
+
+  const column = getDefaultEmptyColumn(room.room_name);
+  await saveColumn(column);
+
+  await respondToWebsocket(client, event, {
+    type: MessageType.COLUMNS_UPDATED,
+    columns: mapColumnsToView(await findColumnsByRoomName(room.room_name)),
+  });
+
+  return;
 }

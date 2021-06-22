@@ -4,6 +4,8 @@ export enum MessageType {
     PARTICIPANT_LOGIN = 'PARTICIPANT_LOGIN',
     PARTICIPANT_JOINED = 'PARTICIPANT_JOINED',
     SCRUM_MASTER_LOGIN = 'SCRUM_MASTER_LOGIN',
+    SCRUM_MASTER_ADD_COLUMN = 'SCRUM_MASTER_ADD_COLUMN',
+    COLUMNS_UPDATED = 'COLUMNS_UPDATED',
     CONFLUENCE_NOTES_SYNC = 'CONFLUENCE_NOTES_SYNC',
     CONFLUENCE_NOTES_SYNCED = 'CONFLUENCE_NOTES_SYNCED',
     PERSISTENT_ID_GENERATED = 'PERSISTENT_ID_GENERATED',
@@ -13,6 +15,7 @@ export enum MessageType {
 
 export type ClientMessage =
     | ScrumMasterLoginMessage
+    | ScrumMasterAddColumnMessage
     | ParticipantLoginMessage
     | ConfluenceNotesSyncMessage;
 
@@ -20,12 +23,23 @@ export type ServerMessage =
     | PersistentIdGeneratedMessage
     | RoomJoinedMessage
     | ActionFailedMessage
+    | ColumnsUpdatedMessage
     | InternalError
     | ConfluenceNotesSyncedMessage;
 
 export interface ScrumMasterLoginMessage {
     type: MessageType.SCRUM_MASTER_LOGIN;
     persistentId?: string;
+}
+
+export interface ScrumMasterAddColumnMessage {
+    type: MessageType.SCRUM_MASTER_ADD_COLUMN;
+    persistentId: string;
+}
+
+export interface ColumnsUpdatedMessage {
+    type: MessageType.COLUMNS_UPDATED;
+    columns: Column[];
 }
 
 export interface ParticipantLoginMessage {

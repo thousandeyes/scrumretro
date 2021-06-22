@@ -1,7 +1,7 @@
 <template>
   <div class="top-bar">
     <span class="room-label">
-      <strong>connected:</strong> {{ room.connected || '-' }}
+      <strong>Connected:</strong> {{ room.connected || '-' }}
     </span>
     <span class="room-label">
       <strong>Persistent ID:</strong> {{ room.persistentId || '-' }}
