@@ -10,6 +10,7 @@ import addPostHandler from "./messageHandlers/addPostHandler";
 import changeColumnOpenStateHandler from "./messageHandlers/changeColumnOpenStateHandler";
 import confluenceNotesSyncHandler from "./messageHandlers/confluenceNotesSyncHandler";
 import changeColumnNameHandler from "./messageHandlers/changeColumnNameHandler";
+import deleteColumnHandler from "./messageHandlers/deleteColumnHandler";
 
 const MessageHandlers: Record<ClientMessage["type"], MessageHandlerFn> = {
   PARTICIPANT_LOGIN: participantLoginHandler,
@@ -19,6 +20,7 @@ const MessageHandlers: Record<ClientMessage["type"], MessageHandlerFn> = {
   CHANGE_COLUMN_OPEN_STATE: changeColumnOpenStateHandler,
   CONFLUENCE_NOTES_SYNC: confluenceNotesSyncHandler,
   CHANGE_COLUMN_NAME: changeColumnNameHandler,
+  DELETE_COLUMN: deleteColumnHandler,
 };
 
 export default async function(

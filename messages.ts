@@ -18,6 +18,7 @@ export enum MessageType {
   COLUMN_OPEN_STATE_CHANGED = "COLUMN_OPEN_STATE_CHANGED",
   CHANGE_COLUMN_NAME = "CHANGE_COLUMN_NAME",
   COLUMN_NAME_CHANGED = "COLUMN_NAME_CHANGED",
+  DELETE_COLUMN = "DELETE_COLUMN",
 }
 
 export type ClientMessage =
@@ -27,7 +28,8 @@ export type ClientMessage =
   | ConfluenceNotesSyncMessage
   | AddPostMessage
   | ChangeColumnOpenStateMessage
-  | ChangeColumnNameMessage;
+  | ChangeColumnNameMessage
+  | DeleteColumnMessage;
 
 export type ServerMessage =
   | PersistentIdGeneratedMessage
@@ -140,4 +142,10 @@ export interface ColumnNameChangedMessage {
   type: MessageType.COLUMN_NAME_CHANGED;
   columnId: string;
   columnName: string;
+}
+
+export interface DeleteColumnMessage {
+  type: MessageType.DELETE_COLUMN;
+  columnId: string;
+  roomName: string;
 }

@@ -81,3 +81,10 @@ export async function updateColumnNameByColumnId(columnId: string, columnName: s
   }).promise();
   return result.Attributes as Column;
 }
+
+export async function deleteColumnById(columnId: string): Promise<void> {
+  await dynamoDb.delete({
+    TableName: TABLE_NAME,
+    Key: { column_id: columnId },
+  }).promise();
+}
