@@ -68,3 +68,16 @@ export async function updateColumnOpenStateByColumnId(columnId: string, isOpen: 
   }).promise();
   return result.Attributes as Column;
 }
+
+export async function updateColumnNameByColumnId(columnId: string, columnName: string): Promise<Column> {
+  const result = await dynamoDb.update({
+    TableName: TABLE_NAME,
+    Key: { column_id: columnId },
+    UpdateExpression: 'SET column_name = :column_name',
+    ExpressionAttributeValues: {
+      ':column_name': columnName
+    },
+    ReturnValues: 'ALL_NEW'
+  }).promise();
+  return result.Attributes as Column;
+}

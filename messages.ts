@@ -16,6 +16,8 @@ export enum MessageType {
   POST_ADDED = "POST_ADDED",
   CHANGE_COLUMN_OPEN_STATE = "CHANGE_COLUMN_OPEN_STATE",
   COLUMN_OPEN_STATE_CHANGED = "COLUMN_OPEN_STATE_CHANGED",
+  CHANGE_COLUMN_NAME = "CHANGE_COLUMN_NAME",
+  COLUMN_NAME_CHANGED = "COLUMN_NAME_CHANGED",
 }
 
 export type ClientMessage =
@@ -24,7 +26,8 @@ export type ClientMessage =
   | ParticipantLoginMessage
   | ConfluenceNotesSyncMessage
   | AddPostMessage
-  | ChangeColumnOpenStateMessage;
+  | ChangeColumnOpenStateMessage
+  | ChangeColumnNameMessage;
 
 export type ServerMessage =
   | PersistentIdGeneratedMessage
@@ -35,7 +38,8 @@ export type ServerMessage =
   | InternalError
   | ConfluenceNotesSyncedMessage
   | PostAddedMessage
-  | ColumnOpenStateChangedMessage;
+  | ColumnOpenStateChangedMessage
+  | ColumnNameChangedMessage;
 
 export interface ScrumMasterLoginMessage {
   type: MessageType.SCRUM_MASTER_LOGIN;
@@ -123,4 +127,17 @@ export interface ColumnOpenStateChangedMessage {
   type: MessageType.COLUMN_OPEN_STATE_CHANGED;
   columnId: string;
   isOpen: boolean;
+}
+
+export interface ChangeColumnNameMessage {
+  type: MessageType.CHANGE_COLUMN_NAME;
+  columnId: string;
+  roomName: string;
+  columnName: string;
+}
+
+export interface ColumnNameChangedMessage {
+  type: MessageType.COLUMN_NAME_CHANGED;
+  columnId: string;
+  columnName: string;
 }
