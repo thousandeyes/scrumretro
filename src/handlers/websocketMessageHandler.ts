@@ -8,11 +8,11 @@ import scrumMasterLoginHandler from "./messageHandlers/scrumMasterLoginHandler";
 import addColumnHandler from "./messageHandlers/addColumnHandler";
 import addPostHandler from "./messageHandlers/addPostHandler";
 import changeColumnOpenStateHandler from "./messageHandlers/changeColumnOpenStateHandler";
+import addAtlassianTokenHandler from "./messageHandlers/addAtlassianTokenHandler";
 import confluenceNotesSyncHandler from "./messageHandlers/confluenceNotesSyncHandler";
 import changeColumnNameHandler from "./messageHandlers/changeColumnNameHandler";
 import deleteColumnHandler from "./messageHandlers/deleteColumnHandler";
 import deletePostHandler from "./messageHandlers/deletePostHandler";
-import addAtlassianTokenHandler from "./messageHandlers/addAtlassianTokenHandler";
 
 const MessageHandlers: Record<ClientMessage["type"], MessageHandlerFn> = {
   PARTICIPANT_LOGIN: participantLoginHandler,
@@ -20,11 +20,11 @@ const MessageHandlers: Record<ClientMessage["type"], MessageHandlerFn> = {
   SCRUM_MASTER_ADD_COLUMN: addColumnHandler,
   ADD_POST: addPostHandler,
   CHANGE_COLUMN_OPEN_STATE: changeColumnOpenStateHandler,
+  ATLASSIAN_TOKEN_ADD: addAtlassianTokenHandler,
   CONFLUENCE_NOTES_SYNC: confluenceNotesSyncHandler,
   CHANGE_COLUMN_NAME: changeColumnNameHandler,
   DELETE_COLUMN: deleteColumnHandler,
   DELETE_POST: deletePostHandler,
-  ATLASSIAN_TOKEN_ADD: addAtlassianTokenHandler,
 };
 
 export default async function(
