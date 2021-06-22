@@ -5,6 +5,7 @@ import {
   ParticipantJoinedMessage,
   PersistentIdGeneratedMessage,
   PostAddedMessage,
+  PostDeletedMessage,
   RoomJoinedMessage
 } from "../../../messages";
 import { keyBy } from "lodash";
@@ -114,6 +115,12 @@ export default {
       persistentId,
       participantName
     });
+  },
+  POST_DELETED(state: Room, { postId: deletedPostId }: PostDeletedMessage) {
+    state.columns = state.columns.map(column => ({
+      ...column,
+      posts: column.posts.filter(({ postId }) => postId !== deletedPostId)
+    }));
   }
 };
 

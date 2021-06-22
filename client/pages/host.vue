@@ -83,6 +83,7 @@ export default Vue.extend({
         case MessageType.COLUMN_OPEN_STATE_CHANGED:
         case MessageType.COLUMN_NAME_CHANGED:
         case MessageType.PARTICIPANT_JOINED:
+        case MessageType.POST_DELETED:
           this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.CONFLUENCE_NOTES_SYNCED:

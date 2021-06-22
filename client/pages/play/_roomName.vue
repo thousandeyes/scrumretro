@@ -80,6 +80,7 @@ export default Vue.extend({
         case MessageType.POST_ADDED:
         case MessageType.COLUMN_OPEN_STATE_CHANGED:
         case MessageType.COLUMN_NAME_CHANGED:
+        case MessageType.POST_DELETED:
           this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.ACTION_FAILED:
