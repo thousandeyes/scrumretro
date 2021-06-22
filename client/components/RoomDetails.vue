@@ -5,7 +5,7 @@
     </span>
     <span class="room-label">
       <strong>Persistent ID:</strong> {{ room.persistentId || "-" }}
-      <button v-if="room.persistentId" @click="deletePersistentId">
+      <button v-if="room.persistentId" @click="resetPersistentId">
         ❌
       </button>
     </span>
@@ -17,6 +17,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from "vue";
+import { mapMutations } from "vuex";
 import Room from "../models/Room";
 
 export default Vue.extend({
@@ -24,18 +25,13 @@ export default Vue.extend({
     room: {
       type: Object as PropType<Room>,
       required: true
-    },
-    persistentIdKey: {
-      type: String,
-      required: true
     }
   },
+
   methods: {
-    deletePersistentId() {
-      const localStorageKey = `${this.$config.stage}/${this.persistentIdKey}`;
-      delete window.localStorage[localStorageKey];
-      window.location.reload();
-    }
+    ...mapMutations({
+      resetPersistentId: "room/resetPersistentId"
+    })
   }
 });
 </script>

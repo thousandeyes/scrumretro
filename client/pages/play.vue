@@ -1,6 +1,6 @@
 <template>
   <div class="player-view">
-    <RoomDetails :persistentIdKey="persistentIdKey" :room="room" />
+    <RoomDetails :room="room" />
     <div v-if="alertMsg" class="alert">{{ alertMsg }}</div>
     <div v-if="room.roomName != null" class="play">
       <ViewColumns :columns="room.columns" :onPostSubmit="onPostSubmit" />
@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import Column from "../models/Column";
+import { mapMutations, mapGetters } from "vuex";
 import ViewColumns from "../components/ViewColumns.vue";
 import JoinRoom from "../components/JoinRoom.vue";
 import RoomDetails from "../components/RoomDetails.vue";
@@ -22,41 +22,17 @@ import {
   RoomJoinedMessage,
   ServerMessage
 } from "../../messages";
-import Room from "../models/Room";
-
-const PERSISTENT_ID_KEY = "participant/persistentId";
+import { ROOM_MODE } from "../models/Room";
 
 export default Vue.extend({
   components: { RoomDetails, ViewColumns, JoinRoom },
   data(): State {
-    const id = `Column ${randomId()}`;
-    const columns: Column[] = [
-      {
-        columnId: id,
-        columnName: id,
-        isOpen: true,
-        posts: [],
-        createdDate: Date.now() / 1000,
-      }
-    ];
     return {
-      persistentIdKey: PERSISTENT_ID_KEY,
-      room: {
-        roomName: undefined,
-        connected: false,
-        persistentId: undefined,
-        columns,
-        participants: []
-      },
       alertMsg: undefined
     };
   },
   mounted() {
-    const localStorageKey = `${this.$config.stage}/${PERSISTENT_ID_KEY}`;
-    if (window.localStorage && window.localStorage[localStorageKey] != null) {
-      this.room.persistentId = window.localStorage[localStorageKey];
-    }
-
+    this.initRoomState(this.$config.stage, ROOM_MODE.PLAYER);
     this.socket = new WebSocket(this.$config.websocketUrl);
     this.socket.onopen = () => this.socketOpened();
     this.socket.onmessage = event => this.onSocketMessage(event);
@@ -64,9 +40,18 @@ export default Vue.extend({
   beforeDestroy() {
     this.socket.close();
   },
+  computed: {
+    ...mapGetters({
+      room: "room/getRoom"
+    })
+  },
   methods: {
+    ...mapMutations({
+      initRoomState: "room/init",
+      connected: "room/connected"
+    }),
     socketOpened() {
-      this.room.connected = true;
+      this.connected();
     },
     onSocketMessage(event: MessageEvent) {
       const message: ServerMessage = JSON.parse(event.data);
@@ -76,20 +61,14 @@ export default Vue.extend({
       }
       switch (message.type) {
         case MessageType.PERSISTENT_ID_GENERATED:
-          this.savePersistentId(message.persistentId);
-          break;
         case MessageType.ROOM_JOINED:
-          this.roomJoined(message);
+        case MessageType.COLUMNS_UPDATED:
+          this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.ACTION_FAILED:
           this.alertMsg = message.details;
           break;
       }
-    },
-    savePersistentId(persistentId: string) {
-      const localStorageKey = `${this.$config.stage}/${PERSISTENT_ID_KEY}`;
-      window.localStorage[localStorageKey] = persistentId;
-      this.room.persistentId = persistentId;
     },
     roomJoined({ roomName, columns }: RoomJoinedMessage) {
       Object.assign(this.room, { roomName, columns });
@@ -109,7 +88,7 @@ export default Vue.extend({
         participantId: this.room.persistentId,
         roomName: this.room.roomName,
         columnId,
-        content,
+        content
       };
       this.socket.send(JSON.stringify(message));
     }
@@ -117,13 +96,7 @@ export default Vue.extend({
 });
 
 interface State {
-  persistentIdKey: string;
-  room: Room;
   alertMsg?: string;
-}
-
-function randomId() {
-  return Math.floor(Math.random() * 10000000000);
 }
 </script>
 

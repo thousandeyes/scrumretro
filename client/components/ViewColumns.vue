@@ -26,7 +26,10 @@ export default Vue.extend({
     columns: { type: Array as PropType<Column[]> },
     adminMode: { type: Boolean, default: false },
     onNewColumn: { type: Function as PropType<() => void>, default: () => {} },
-    onPostSubmit: { type: Function as PropType<(columnId: string, content: string) => void>, required: true },
+    onPostSubmit: {
+      type: Function as PropType<(columnId: string, content: string) => void>,
+      default: () => {}
+    }
   }
 });
 </script>
