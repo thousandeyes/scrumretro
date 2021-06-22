@@ -7,6 +7,7 @@
       :onNewColumn="onNewColumn"
       :onColumnOpened="onColumnOpened"
       :onColumnRenamed="onColumnRenamed"
+      :onColumnDeleted="onColumnDeleted"
     />
     <SyncNotes
       :persistentIdKey="persistentIdKey"
@@ -91,6 +92,15 @@ export default Vue.extend({
         JSON.stringify({
           type: MessageType.SCRUM_MASTER_ADD_COLUMN,
           persistentId: this.room.persistentId
+        })
+      );
+    },
+    onColumnDeleted(columnId: string) {
+      this.socket.send(
+        JSON.stringify({
+          type: MessageType.DELETE_COLUMN,
+          roomName: this.room.roomName,
+          columnId
         })
       );
     },
