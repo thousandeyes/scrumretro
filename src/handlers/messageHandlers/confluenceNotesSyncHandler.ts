@@ -50,7 +50,7 @@ async function syncConfluenceNotes(
 
   const now = new Date();
 
-  const foo = formatRetroPageContent(
+  const retroPage = formatRetroPageContent(
     now,
     "ggeorgalis",
     ["ggeorgalis", "ftw", "ftw2"],
@@ -67,7 +67,7 @@ async function syncConfluenceNotes(
       p = await createRetroPage(now, parent!, config);
   }
 
-  p = await updateRetroPage(p!, foo, config);
+  p = await updateRetroPage(p!, retroPage, config);
 
   return "https://thousandeyes.atlassian.net/wiki";
 }
@@ -102,7 +102,7 @@ export async function findEndpointRetroPage(date: Date, config: Config) : Promis
   const rawResponse = await axios.get(findEndpointRetroPageQuery, config);
   const response = rawResponse.data;
 
-  if (response?.results?.length != 1) {
+  if (response?.results?.length !== 1) {
       return;
   }
 
@@ -114,7 +114,7 @@ export async function findEndpointRetroPagesParent(date: Date, config: Config) :
   const rawResponse = await axios.get(findEndpointRetroPagesParentQuery, config);
   const response = rawResponse.data;
 
-  if (response?.results?.length != 1) {
+  if (response?.results?.length !== 1) {
       return;
   }
 
@@ -122,7 +122,7 @@ export async function findEndpointRetroPagesParent(date: Date, config: Config) :
       p => p.title.startsWith(date.getFullYear())
   );
 
-  if (retroPagesParent?.length != 1) {
+  if (retroPagesParent?.length !== 1) {
       return;
   }
 
