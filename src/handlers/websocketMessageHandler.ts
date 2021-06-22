@@ -13,7 +13,6 @@ import confluenceNotesSyncHandler from "./messageHandlers/confluenceNotesSyncHan
 import changeColumnNameHandler from "./messageHandlers/changeColumnNameHandler";
 import deleteColumnHandler from "./messageHandlers/deleteColumnHandler";
 import deletePostHandler from "./messageHandlers/deletePostHandler";
-import addAtlassianTokenHandler from "./messageHandlers/addAtlassianTokenHandler";
 
 const MessageHandlers: Record<ClientMessage["type"], MessageHandlerFn> = {
   PARTICIPANT_LOGIN: participantLoginHandler,
@@ -21,7 +20,6 @@ const MessageHandlers: Record<ClientMessage["type"], MessageHandlerFn> = {
   SCRUM_MASTER_ADD_COLUMN: addColumnHandler,
   ADD_POST: addPostHandler,
   CHANGE_COLUMN_OPEN_STATE: changeColumnOpenStateHandler,
-  ATLASSIAN_TOKEN_ADD: addAtlassianTokenHandler,
   CONFLUENCE_NOTES_SYNC: confluenceNotesSyncHandler,
   CHANGE_COLUMN_NAME: changeColumnNameHandler,
   DELETE_COLUMN: deleteColumnHandler,
