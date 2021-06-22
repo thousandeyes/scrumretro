@@ -5,21 +5,19 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
-import Post from '../models/Post';
-
+import Vue, { PropType } from "vue";
+import Post from "../models/Post";
 
 export default Vue.extend({
   props: {
     post: {
-      type: Object as  PropType<Post>
-    },
-  },
+      type: Object as PropType<Post>
+    }
+  }
 });
 </script>
 
 <style scoped>
-
 .view-post {
   text-align: center;
   color: #444;
@@ -28,6 +26,4 @@ export default Vue.extend({
   background-color: #fafafa;
   padding: 5px;
 }
-
-
 </style>

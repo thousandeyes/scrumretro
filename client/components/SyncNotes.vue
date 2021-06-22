@@ -1,24 +1,28 @@
 <template>
   <form @submit.prevent="sync" novalidate>
-    <textarea placeholder="Additional Comment" @input="valueChanged" :value="value" />
+    <textarea
+      placeholder="Additional Comment"
+      @input="valueChanged"
+      :value="value"
+    />
     <div class="buttons">
       <div class="confluence-page-url">
-        {{state.confluencePageUrl}}
+        {{ state.confluencePageUrl }}
       </div>
       <div class="message">
-        <small> {{state.message}} </small>
+        <small> {{ state.message }} </small>
       </div>
       <div class="errors">
-        <small> {{error}} </small>
+        <small> {{ error }} </small>
       </div>
-      <button type="submit"> Sync Notes </button>
+      <button type="submit">Sync Notes</button>
     </div>
   </form>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
-import SyncNotesState from '../models/SyncNotesState';
+import Vue, { PropType } from "vue";
+import SyncNotesState from "../models/SyncNotesState";
 
 export default Vue.extend({
   props: {
@@ -28,11 +32,10 @@ export default Vue.extend({
     },
     state: {
       type: Object as PropType<SyncNotesState>,
-      required: true,
-    },
-
+      required: true
+    }
   },
-  data(): { value: string | null, error: string | null } {
+  data(): { value: string | null; error: string | null } {
     return { value: null, error: null };
   },
   methods: {
@@ -49,7 +52,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-
 form {
   display: flex;
   flex-direction: column;
@@ -78,5 +80,4 @@ textarea {
 .confluence-page-url {
   color: darkslategray;
 }
-
 </style>

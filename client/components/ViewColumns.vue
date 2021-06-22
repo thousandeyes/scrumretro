@@ -1,6 +1,11 @@
 <template>
   <div class="view-columns">
-    <Column v-for="column in columns" :key="column.columnId" :column="column" :adminMode="adminMode" />
+    <Column
+      v-for="column in columns"
+      :key="column.columnId"
+      :column="column"
+      :adminMode="adminMode"
+    />
     <div v-if="adminMode">
       <div class="manage-columns-btns">
         <button @click="onNewColumn">➕</button>
@@ -10,17 +15,17 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
-import Column from '../models/Column';
-import ColumnComponent from '../components/Column.vue';
+import Vue, { PropType } from "vue";
+import Column from "../models/Column";
+import ColumnComponent from "../components/Column.vue";
 
 export default Vue.extend({
-  components: { Column: ColumnComponent, },
+  components: { Column: ColumnComponent },
   props: {
     columns: { type: Array as PropType<Column[]> },
     adminMode: { type: Boolean, default: false },
-    onNewColumn: { type: Function as PropType<() => void>, default: () => {} },
-  },
+    onNewColumn: { type: Function as PropType<() => void>, default: () => {} }
+  }
 });
 </script>
 

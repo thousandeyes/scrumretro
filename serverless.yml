@@ -1,5 +1,5 @@
 service: hackday-scrum-retro
-frameworkVersion: '2'
+frameworkVersion: "2"
 
 plugins:
   - serverless-s3-sync
@@ -23,13 +23,13 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         - !GetAtt DynamoDbRoomsTable.Arn
-        - !Join ['/', [!GetAtt DynamoDbRoomsTable.Arn, 'index', '*' ] ]
+        - !Join ["/", [!GetAtt DynamoDbRoomsTable.Arn, "index", "*"]]
         - !GetAtt DynamoDbColumnsTable.Arn
-        - !Join ['/', [!GetAtt DynamoDbColumnsTable.Arn, 'index', '*' ] ]
+        - !Join ["/", [!GetAtt DynamoDbColumnsTable.Arn, "index", "*"]]
         - !GetAtt DynamoDbPostsTable.Arn
-        - !Join ['/', [!GetAtt DynamoDbPostsTable.Arn, 'index', '*' ] ]
+        - !Join ["/", [!GetAtt DynamoDbPostsTable.Arn, "index", "*"]]
         - !GetAtt DynamoDbParticipantsTable.Arn
-        - !Join ['/', [!GetAtt DynamoDbParticipantsTable.Arn, 'index', '*' ] ]
+        - !Join ["/", [!GetAtt DynamoDbParticipantsTable.Arn, "index", "*"]]
   logs:
     websocket: false
   environment:
@@ -64,14 +64,14 @@ custom:
       localDir: .nuxt/dist/client
   customDomain:
     domainName: ${self:custom.secrets.domainName.${self:provider.stage}}
-    basePath: ''
+    basePath: ""
     endpointType: regional
-    certificateName: 'scrumretro.lol'
+    certificateName: "scrumretro.lol"
     stage: ${self:provider.stage}
     createRoute53Record: true
   apigwBinary:
     types:
-      - '*/*'
+      - "*/*"
 
 package:
   excludeDevDependencies: true
@@ -127,9 +127,9 @@ resources:
         CorsConfiguration:
           CorsRules:
             - AllowedOrigins:
-                - '*'
+                - "*"
               AllowedHeaders:
-                - '*'
+                - "*"
               AllowedMethods:
                 - GET
                 - HEAD
@@ -147,19 +147,25 @@ resources:
         Bucket:
           Ref: ClientAssetsBucket
         PolicyDocument:
-          Version: '2012-10-17'
-          Statement: [
-            {
-              Action: ['s3:GetObject'],
-              Effect: 'Allow',
-              Resource: {
-                Fn::Join: ['', ['arn:aws:s3:::', { Ref: 'ClientAssetsBucket' }, '/*']],
+          Version: "2012-10-17"
+          Statement:
+            [
+              {
+                Action: ["s3:GetObject"],
+                Effect: "Allow",
+                Resource:
+                  {
+                    Fn::Join:
+                      [
+                        "",
+                        ["arn:aws:s3:::", { Ref: "ClientAssetsBucket" }, "/*"],
+                      ],
+                  },
+                Principal: "*",
               },
-              Principal: '*'
-            },
-          ]
+            ]
     DynamoDbRoomsTable:
-      Type: 'AWS::DynamoDB::Table'
+      Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Delete
       Properties:
         TableName: ${self:custom.dynamoDb.roomsTable.name}
@@ -186,7 +192,7 @@ resources:
               - AttributeName: connection_id
                 KeyType: HASH
     DynamoDbColumnsTable:
-      Type: 'AWS::DynamoDB::Table'
+      Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Delete
       Properties:
         TableName: ${self:custom.dynamoDb.columnsTable.name}
@@ -206,7 +212,7 @@ resources:
               - AttributeName: room_name
                 KeyType: HASH
     DynamoDbPostsTable:
-      Type: 'AWS::DynamoDB::Table'
+      Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Delete
       Properties:
         TableName: ${self:custom.dynamoDb.postsTable.name}
@@ -218,7 +224,7 @@ resources:
           - AttributeName: column_id
             KeyType: HASH
     DynamoDbParticipantsTable:
-      Type: 'AWS::DynamoDB::Table'
+      Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Delete
       Properties:
         TableName: ${self:custom.dynamoDb.participantsTable.name}
