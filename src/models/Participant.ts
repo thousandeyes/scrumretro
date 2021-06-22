@@ -3,4 +3,5 @@ export default interface Participant {
   participant_name: string;
   connection_id: string;
   persistent_id: string;
+  online: boolean;
 }

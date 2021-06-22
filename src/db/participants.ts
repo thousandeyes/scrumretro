@@ -4,6 +4,7 @@ import dynamoDb from "./dynamoDb";
 const TABLE_NAME: string = process.env.DYNAMODB_TB_PARTICIPANTS!;
 const ROOM_NAME_IDX: string = process.env
   .DYNAMODB_TB_PARTICIPANTS_IDX_ROOM_NAME!;
+const CONNECTION_ID_IDX_NAME: string = process.env.DYNAMODB_PARTICIPANTS_CONNECTION_ID_INDEX!;
 
 export async function findParticipantByRoomNameAndPersistentId(
   roomName: string,
@@ -60,4 +61,27 @@ export async function saveRoomParticipant(
       }
     })
     .promise();
+}
+
+export async function findParticipantByConnectionId(
+    connectionId: string
+): Promise<Participant | undefined> {
+    const result = await dynamoDb.query({
+        TableName: TABLE_NAME,
+        IndexName: CONNECTION_ID_IDX_NAME,
+        KeyConditionExpression: 'connection_id = :connectionId',
+        ExpressionAttributeValues: {
+            ':connectionId': connectionId,
+        },
+    }).promise();
+
+    if (result.Count == null) {
+        return;
+    }
+    else if (result.Count > 1) {
+        return Promise.reject(new Error('findParticipantByConnectionId returned more than one player'));
+    }
+    else if (result.Count == 1) {
+        return result.Items![0] as Participant;
+    }
 }
