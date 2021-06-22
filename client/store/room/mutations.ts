@@ -1,6 +1,8 @@
 import {
+  ColumnNameChangedMessage,
   ColumnOpenStateChangedMessage,
   ColumnsUpdatedMessage,
+  MessageType,
   PersistentIdGeneratedMessage,
   PostAddedMessage,
   RoomJoinedMessage
@@ -85,6 +87,18 @@ export default {
     }
 
     column.isOpen = isOpen;
+  },
+  COLUMN_NAME_CHANGED(
+    state: Room,
+    { columnId, columnName }: ColumnNameChangedMessage,
+  ) {
+    const columnsById = keyBy(state.columns, "columnId");
+    const column = columnsById[columnId];
+    if (!column) {
+      return;
+    }
+
+    column.columnName = columnName;
   }
 };
 

@@ -7,6 +7,7 @@
       :adminMode="adminMode"
       :onPostSubmit="onPostSubmit"
       :onColumnOpened="onColumnOpened"
+      :onColumnRenamed="onColumnRenamed"
     />
     <h3 v-if="noColumns" class="no-columns">
       Host has not enabled columns for submissions
@@ -36,6 +37,10 @@ export default Vue.extend({
     },
     onColumnOpened: {
       type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
+      default: () => {}
+    },
+        onColumnRenamed: {
+      type: Function as PropType<(columnId: string, columnName: string) => void>,
       default: () => {}
     }
   },

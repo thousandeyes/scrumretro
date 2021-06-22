@@ -3,7 +3,11 @@
     <RoomDetails :room="room" />
     <div v-if="alertMsg" class="alert">{{ alertMsg }}</div>
     <div v-if="room.roomName != null" class="play">
-      <ViewColumns :columns="room.columns" :onPostSubmit="onPostSubmit" />
+      <ViewColumns
+        :columns="room.columns"
+        :onPostSubmit="onPostSubmit"
+        :adminMode="false"
+        />
     </div>
     <JoinRoom
       v-else
@@ -75,6 +79,7 @@ export default Vue.extend({
         case MessageType.COLUMNS_UPDATED:
         case MessageType.POST_ADDED:
         case MessageType.COLUMN_OPEN_STATE_CHANGED:
+        case MessageType.COLUMN_NAME_CHANGED:
           this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.ACTION_FAILED:

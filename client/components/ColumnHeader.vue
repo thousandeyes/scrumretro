@@ -2,7 +2,7 @@
   <div class="column-header">
     <h2 v-if="!edit" :title="column.columnName">{{ column.columnName }}</h2>
     <form v-else @submit.prevent="onEditToggled" novalidate>
-      <input @input="onNameChanged" :value="column.columnName" />
+      <input v-model="columnNameEditing" />
     </form>
     <span v-if="adminMode" class="column-admin-buttons">
       <button @click="onEditToggled">✏️</button>
@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts">
+import { debounce } from "lodash";
 import Vue, { PropType } from "vue";
 import Column from "../models/Column";
 
@@ -29,10 +30,28 @@ export default Vue.extend({
     onColumnOpened: {
       type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
       default: () => {}
+    },
+    onColumnRenamed: {
+      type: Function as PropType<(columnId: string, columnName: string) => void>,
+      default: () => {}
     }
   },
-  data(): { edit: boolean } {
-    return { edit: false };
+  data(): { edit: boolean, columnNameEditing: string } {
+    return {
+      edit: false,
+      columnNameEditing: this.column.columnName,
+    };
+  },
+  watch: {
+    column(newColumn: Column) {
+      this.columnNameEditing = newColumn.columnName;
+    },
+    columnNameEditing(columnName: string) {
+      this.debouncedOnColumnRenamed(this.column.columnId, this.columnNameEditing);
+    },
+  },
+  mounted() {
+    this.debouncedOnColumnRenamed = debounce(this.onColumnRenamed, 250);
   },
   methods: {
     onEditToggled() {
@@ -41,10 +60,6 @@ export default Vue.extend({
     onOpenToggled() {
       this.onColumnOpened(this.column.columnId, !this.column.isOpen);
     },
-    onNameChanged({ target }: { target: HTMLInputElement }) {
-      this.column.columnName = target.value;
-      // TODO: update name on the server
-    }
   }
 });
 </script>

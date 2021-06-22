@@ -4,6 +4,7 @@
       :column="column"
       :onColumnOpened="onColumnOpened"
       :adminMode="adminMode"
+      :onColumnRenamed="onColumnRenamed"
     />
     <div class="column-container">
       <div v-if="!adminMode && column.isOpen" class="post-input column-item">
@@ -41,6 +42,10 @@ export default Vue.extend({
     },
     onColumnOpened: {
       type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
+      default: () => {}
+    },
+    onColumnRenamed: {
+      type: Function as PropType<(columnId: string, columnName: string) => void>,
       default: () => {}
     }
   },

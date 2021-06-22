@@ -6,6 +6,7 @@
       :adminMode="true"
       :onNewColumn="onNewColumn"
       :onColumnOpened="onColumnOpened"
+      :onColumnRenamed="onColumnRenamed"
     />
     <SyncNotes
       :persistentIdKey="persistentIdKey"
@@ -73,6 +74,7 @@ export default Vue.extend({
         case MessageType.COLUMNS_UPDATED:
         case MessageType.POST_ADDED:
         case MessageType.COLUMN_OPEN_STATE_CHANGED:
+        case MessageType.COLUMN_NAME_CHANGED:
           this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.CONFLUENCE_NOTES_SYNCED:
@@ -112,7 +114,17 @@ export default Vue.extend({
       );
 
       // TODO: Update UI
-    }
+    },
+    onColumnRenamed(columnId: string, columnName: string) {
+      this.socket.send(
+        JSON.stringify({
+          type: MessageType.CHANGE_COLUMN_NAME,
+          roomName: this.room.roomName,
+          columnId,
+          columnName,
+        })
+      );
+    },
   }
 });
 
