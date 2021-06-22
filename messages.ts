@@ -1,4 +1,5 @@
 import Column from "./client/models/Column";
+import Post from "./client/models/Post";
 
 export enum MessageType {
   PARTICIPANT_LOGIN = "PARTICIPANT_LOGIN",
@@ -104,8 +105,5 @@ export interface AddPostMessage {
 
 export interface PostAddedMessage {
   type: MessageType.POST_ADDED;
-  participantId: string;
-  columnId: string;
-  roomName: string;
-  content: string;
+  post: Post;
 }
