@@ -19,6 +19,8 @@ export enum MessageType {
   CHANGE_COLUMN_NAME = "CHANGE_COLUMN_NAME",
   COLUMN_NAME_CHANGED = "COLUMN_NAME_CHANGED",
   DELETE_COLUMN = "DELETE_COLUMN",
+  DELETE_POST = "DELETE_POST",
+  POST_DELETED = "POST_DELETED",
 }
 
 export type ClientMessage =
@@ -29,7 +31,8 @@ export type ClientMessage =
   | AddPostMessage
   | ChangeColumnOpenStateMessage
   | ChangeColumnNameMessage
-  | DeleteColumnMessage;
+  | DeleteColumnMessage
+  | DeletePostMessage;
 
 export type ServerMessage =
   | PersistentIdGeneratedMessage
@@ -41,7 +44,8 @@ export type ServerMessage =
   | ConfluenceNotesSyncedMessage
   | PostAddedMessage
   | ColumnOpenStateChangedMessage
-  | ColumnNameChangedMessage;
+  | ColumnNameChangedMessage
+  | PostDeletedMessage;
 
 export interface ScrumMasterLoginMessage {
   type: MessageType.SCRUM_MASTER_LOGIN;
@@ -148,4 +152,15 @@ export interface DeleteColumnMessage {
   type: MessageType.DELETE_COLUMN;
   columnId: string;
   roomName: string;
+}
+
+export interface DeletePostMessage {
+  type: MessageType.DELETE_POST;
+  postId: string;
+  roomName: string;
+}
+
+export interface PostDeletedMessage {
+  type: MessageType.POST_DELETED;
+  postId: string;
 }

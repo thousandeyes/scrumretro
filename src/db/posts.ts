@@ -47,3 +47,12 @@ export async function savePost(post: Post): Promise<void> {
     })
     .promise();
 }
+
+export async function deletePostById(postId: string): Promise<void> {
+  await dynamoDb
+    .delete({
+      TableName: TABLE_NAME,
+      Key: { post_id: postId }
+    })
+    .promise();
+}
