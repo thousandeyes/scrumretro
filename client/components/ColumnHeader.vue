@@ -14,6 +14,7 @@
           🎤
         </template>
       </button>
+      <button @click="deleteColumn">❌</button>
     </span>
   </div>
 </template>
@@ -34,7 +35,11 @@ export default Vue.extend({
     onColumnRenamed: {
       type: Function as PropType<(columnId: string, columnName: string) => void>,
       default: () => {}
-    }
+    },
+    onColumnDeleted: {
+      type: Function as PropType<(columnId: string) => void>,
+      default: () => {}
+    },
   },
   data(): { edit: boolean, columnNameEditing: string } {
     return {
@@ -59,6 +64,9 @@ export default Vue.extend({
     },
     onOpenToggled() {
       this.onColumnOpened(this.column.columnId, !this.column.isOpen);
+    },
+    deleteColumn() {
+      this.onColumnDeleted(this.column.columnId);
     },
   }
 });

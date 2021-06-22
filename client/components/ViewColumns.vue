@@ -8,6 +8,7 @@
       :onPostSubmit="onPostSubmit"
       :onColumnOpened="onColumnOpened"
       :onColumnRenamed="onColumnRenamed"
+      :onColumnDeleted="onColumnDeleted"
     />
     <h3 v-if="noColumns" class="no-columns">
       Host has not enabled columns for submissions
@@ -41,6 +42,10 @@ export default Vue.extend({
     },
         onColumnRenamed: {
       type: Function as PropType<(columnId: string, columnName: string) => void>,
+      default: () => {}
+    },
+    onColumnDeleted: {
+      type: Function as PropType<(columnId: string) => void>,
       default: () => {}
     }
   },

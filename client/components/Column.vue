@@ -3,6 +3,7 @@
     <ColumnHeader
       :column="column"
       :onColumnOpened="onColumnOpened"
+      :onColumnDeleted="onColumnDeleted"
       :adminMode="adminMode"
       :onColumnRenamed="onColumnRenamed"
     />
@@ -46,6 +47,10 @@ export default Vue.extend({
     },
     onColumnRenamed: {
       type: Function as PropType<(columnId: string, columnName: string) => void>,
+      default: () => {}
+    },
+    onColumnDeleted: {
+      type: Function as PropType<(columnId: string) => void>,
       default: () => {}
     }
   },
