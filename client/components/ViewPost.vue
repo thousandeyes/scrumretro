@@ -1,14 +1,14 @@
 <template>
   <div class="view-post">
     <template v-if="masked">
+      <em class="post-content">Comments are masked</em>
+    </template>
+    <template v-else>
       <ParticipantBadge
         v-if="post.participant"
         :participant="post.participant"
       />
       <span class="post-content"> {{ post.text }} </span>
-    </template>
-    <template v-else>
-      <em class="post-content">Comments are masked</em>
     </template>
   </div>
 </template>
