@@ -1,19 +1,26 @@
 <template>
   <div>
     <RoomDetails :persistentIdKey="persistentIdKey" :room="room" />
-    <ViewColumns :columns="room.columns" :adminMode="true" :onNewColumn="onNewColumn" />
-    <SyncNotes :persistentIdKey="persistentIdKey" :onSync="onSyncNotes" :state="syncNotesState" />
+    <ViewColumns
+      :columns="room.columns"
+      :adminMode="true"
+      :onNewColumn="onNewColumn"
+    />
+    <SyncNotes
+      :persistentIdKey="persistentIdKey"
+      :onSync="onSyncNotes"
+      :state="syncNotesState"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import { MessageType, ServerMessage } from "../../messages";
-import ViewColumns from '../components/ViewColumns.vue';
-import RoomDetails from '../components/RoomDetails.vue';
-import SyncNotes from '../components/SyncNotes.vue';
-import Room from '../models/Room';
-
+import ViewColumns from "../components/ViewColumns.vue";
+import RoomDetails from "../components/RoomDetails.vue";
+import SyncNotes from "../components/SyncNotes.vue";
+import Room from "../models/Room";
 
 const PERSISTENT_ID_KEY = "persistentId";
 
@@ -30,10 +37,10 @@ export default Vue.extend({
         participants: [],
       },
       syncNotesState: {
-        message: '',
-        confluencePageUrl: ''
-      }
-    }
+        message: "",
+        confluencePageUrl: "",
+      },
+    };
   },
   mounted() {
     const localStorageKey = `${this.$config.stage}/${PERSISTENT_ID_KEY}`;
@@ -73,7 +80,7 @@ export default Vue.extend({
           Object.assign(this.syncNotesState, { response, confluencePageUrl });
           break;
         default:
-          console.warn('Unknown message received', {...message});
+          console.warn("Unknown message received", { ...message });
           break;
       }
 
@@ -96,7 +103,6 @@ export default Vue.extend({
       // TODO: add in socket
     },
     onSyncNotes() {
-
       this.socket.send(
         JSON.stringify({
           type: MessageType.CONFLUENCE_NOTES_SYNC,
@@ -112,6 +118,10 @@ export default Vue.extend({
 interface State {
   persistentIdKey: string;
   room: Room;
+  syncNotesState: {
+    message: string;
+    confluencePageUrl?: string;
+  };
 }
 
 function randomId() {
