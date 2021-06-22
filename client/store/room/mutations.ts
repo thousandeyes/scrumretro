@@ -1,6 +1,7 @@
 import {
   ColumnsUpdatedMessage,
   PersistentIdGeneratedMessage,
+  PostAddedMessage,
   RoomJoinedMessage
 } from "../../../messages";
 import { keyBy } from "lodash";
@@ -46,6 +47,15 @@ export default {
         (columnsById[colDef.columnId] && columnsById[colDef.columnId].posts) ||
         []
     }));
+  },
+  POST_ADDED(state: Room, { post }: PostAddedMessage) {
+    const columnsById = keyBy(state.columns, "columnId");
+    const column = columnsById[post.columnId];
+    if (!column) {
+      return;
+    }
+
+    column.posts.push(post);
   }
 };
 

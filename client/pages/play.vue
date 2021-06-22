@@ -63,6 +63,7 @@ export default Vue.extend({
         case MessageType.PERSISTENT_ID_GENERATED:
         case MessageType.ROOM_JOINED:
         case MessageType.COLUMNS_UPDATED:
+        case MessageType.POST_ADDED:
           this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.ACTION_FAILED:
