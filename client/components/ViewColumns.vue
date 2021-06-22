@@ -6,7 +6,11 @@
       :column="column"
       :adminMode="adminMode"
       :onPostSubmit="onPostSubmit"
+      :onColumnOpened="onColumnOpened"
     />
+    <h3 v-if="noColumns" class="no-columns">
+      Host has not enabled columns for submissions
+    </h3>
     <div v-if="adminMode">
       <div class="manage-columns-btns">
         <button @click="onNewColumn">➕</button>
@@ -29,6 +33,15 @@ export default Vue.extend({
     onPostSubmit: {
       type: Function as PropType<(columnId: string, content: string) => void>,
       default: () => {}
+    },
+    onColumnOpened: {
+      type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
+      default: () => {}
+    }
+  },
+  computed: {
+    noColumns() {
+      return this.columns.length === 0;
     }
   }
 });
@@ -53,5 +66,9 @@ button {
   background: transparent;
   margin-block-start: 0.83em;
   font-size: 1.5em;
+}
+
+.no-columns {
+  text-align: center;
 }
 </style>

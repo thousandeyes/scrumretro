@@ -25,7 +25,11 @@ import Column from "../models/Column";
 export default Vue.extend({
   props: {
     column: { type: Object as PropType<Column>, required: true },
-    adminMode: { type: Boolean, default: true }
+    adminMode: { type: Boolean, default: true },
+    onColumnOpened: {
+      type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
+      default: () => {}
+    }
   },
   data(): { edit: boolean } {
     return { edit: false };
@@ -35,8 +39,7 @@ export default Vue.extend({
       this.edit = !this.edit;
     },
     onOpenToggled() {
-      this.column.isOpen = !this.column.isOpen;
-      // TODO: update name on the server
+      this.onColumnOpened(this.column.columnId, !this.column.isOpen);
     },
     onNameChanged({ target }: { target: HTMLInputElement }) {
       this.column.columnName = target.value;

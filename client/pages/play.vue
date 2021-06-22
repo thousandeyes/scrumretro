@@ -42,7 +42,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      room: "room/getRoom"
+      room: "room/getPlayerRoom"
     })
   },
   methods: {
@@ -64,6 +64,7 @@ export default Vue.extend({
         case MessageType.ROOM_JOINED:
         case MessageType.COLUMNS_UPDATED:
         case MessageType.POST_ADDED:
+        case MessageType.COLUMN_OPEN_STATE_CHANGED:
           this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.ACTION_FAILED:

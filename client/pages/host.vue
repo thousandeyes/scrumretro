@@ -5,6 +5,7 @@
       :columns="room.columns"
       :adminMode="true"
       :onNewColumn="onNewColumn"
+      :onColumnOpened="onColumnOpened"
     />
     <SyncNotes
       :persistentIdKey="persistentIdKey"
@@ -37,7 +38,7 @@ export default Vue.extend({
     };
   },
   mounted() {
-    this.initRoomState(this.$config.stage, ROOM_MODE.HOST);
+    this.initRoomState({ stage: this.$config.stage, roomMode: ROOM_MODE.HOST });
     this.socket = new WebSocket(this.$config.websocketUrl);
     this.socket.onopen = () => this.socketOpened();
     this.socket.onmessage = event => this.onSocketMessage(event);
@@ -47,7 +48,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      room: "room/getRoom"
+      room: "room/getHostRoom"
     })
   },
   methods: {
@@ -70,6 +71,8 @@ export default Vue.extend({
         case MessageType.PERSISTENT_ID_GENERATED:
         case MessageType.ROOM_JOINED:
         case MessageType.COLUMNS_UPDATED:
+        case MessageType.POST_ADDED:
+        case MessageType.COLUMN_OPEN_STATE_CHANGED:
           this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.CONFLUENCE_NOTES_SYNCED:
@@ -86,6 +89,17 @@ export default Vue.extend({
         JSON.stringify({
           type: MessageType.SCRUM_MASTER_ADD_COLUMN,
           persistentId: this.room.persistentId
+        })
+      );
+    },
+    onColumnOpened(columnId: string, isOpen: boolean) {
+      this.socket.send(
+        JSON.stringify({
+          type: MessageType.CHANGE_COLUMN_OPEN_STATE,
+          persistentId: this.room.persistentId,
+          roomName: this.room.roomName,
+          columnId,
+          isOpen
         })
       );
     },

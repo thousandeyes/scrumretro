@@ -1,4 +1,5 @@
 import {
+  ColumnOpenStateChangedMessage,
   ColumnsUpdatedMessage,
   PersistentIdGeneratedMessage,
   PostAddedMessage,
@@ -14,7 +15,10 @@ const persistentStorageKeyMap: Record<ROOM_MODE, string> = {
 };
 
 export default {
-  init(state: Room, stage: string, roomMode: ROOM_MODE) {
+  init(
+    state: Room,
+    { stage, roomMode }: { stage: string; roomMode: ROOM_MODE }
+  ) {
     Object.assign(state, getDefaultState(), {
       roomMode,
       stage,
@@ -56,6 +60,18 @@ export default {
     }
 
     column.posts.push(post);
+  },
+  COLUMN_OPEN_STATE_CHANGED(
+    state: Room,
+    { columnId, isOpen }: ColumnOpenStateChangedMessage
+  ) {
+    const columnsById = keyBy(state.columns, "columnId");
+    const column = columnsById[columnId];
+    if (!column) {
+      return;
+    }
+
+    column.isOpen = isOpen;
   }
 };
 
@@ -77,11 +93,11 @@ function storePersistentId(
   window.localStorage[localStorageKey] = persistentId;
 }
 
-function getPersistentIdStorageKey(stage: string, roomMode: ROOM_MODE): string {
-  return `${stage}/${persistentStorageKeyMap[roomMode]}`;
-}
-
 function removeStoredPersistentId(stage: string, roomMode: ROOM_MODE) {
   const localStorageKey = getPersistentIdStorageKey(stage, roomMode);
   delete window.localStorage[localStorageKey];
+}
+
+function getPersistentIdStorageKey(stage: string, roomMode: ROOM_MODE): string {
+  return `${stage}/${persistentStorageKeyMap[roomMode]}`;
 }

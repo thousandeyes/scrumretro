@@ -1,6 +1,10 @@
 <template>
   <div class="column">
-    <ColumnHeader :column="column" />
+    <ColumnHeader
+      :column="column"
+      :onColumnOpened="onColumnOpened"
+      :adminMode="adminMode"
+    />
     <div class="column-container">
       <div v-if="!adminMode && column.isOpen" class="post-input column-item">
         <InputPost :onPost="onPost" />
@@ -25,7 +29,6 @@ import InputPost from "./InputPost.vue";
 import ViewPost from "./ViewPost.vue";
 import ColumnHeader from "./ColumnHeader.vue";
 import Column from "../models/Column";
-import Post from "../models/Post";
 
 export default Vue.extend({
   components: { ColumnHeader, InputPost, ViewPost },
@@ -34,6 +37,10 @@ export default Vue.extend({
     adminMode: { type: Boolean, default: true },
     onPostSubmit: {
       type: Function as PropType<(columnId: string, content: string) => void>,
+      default: () => {}
+    },
+    onColumnOpened: {
+      type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
       default: () => {}
     }
   },
