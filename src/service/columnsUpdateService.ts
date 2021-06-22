@@ -1,4 +1,5 @@
 import { ApiGatewayManagementApi } from "aws-sdk";
+import sortBy from "lodash/sortBy";
 import Column from "../../client/models/Column";
 import { MessageType } from "../../messages";
 import Participant from "../models/Participant";
@@ -22,11 +23,11 @@ async function sendColumnUpdatedMessages(
   for (const participant of participants) {
     await sendToWebsocket(client, participant.connection_id, {
       type: MessageType.COLUMNS_UPDATED,
-      columns: viewColumns.map(col => ({
-        ...col,
-        posts: col.posts.filter(
-          ({ participant: postAuthor }) =>
-            postAuthor.persistentId === participant.persistent_id
+      columns: viewColumns.map(columns => ({
+        ...columns,
+        posts: columns.posts.filter(
+          ({ participant: { persistentId } }) =>
+            persistentId === participant.persistent_id
         )
       }))
     });

@@ -5,9 +5,15 @@ export default {
     return state;
   },
   getPlayerRoom(state: Room): Room {
+    const columns = state.columns
+      .filter(({ isOpen }) => isOpen)
+      .map(column => ({
+        ...column,
+        posts: [...column.posts].reverse()
+      }));
     return {
       ...state,
-      columns: state.columns.filter(({ isOpen }) => isOpen)
+      columns
     };
   }
 };

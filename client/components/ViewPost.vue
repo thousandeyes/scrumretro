@@ -9,7 +9,13 @@
         :participant="post.participant"
       />
       <span class="post-content"> {{ post.text }} </span>
-      <button class="delete-post-btn" @click="() => onPostDeleted(post.postId)">❌</button>
+      <button
+        v-if="!adminMode"
+        class="delete-post-btn"
+        @click="() => onPostDeleted(post.postId)"
+      >
+        ❌
+      </button>
     </template>
   </div>
 </template>
@@ -24,17 +30,23 @@ export default Vue.extend({
   props: {
     post: { type: Object as PropType<Post> },
     masked: { type: Boolean, default: false },
-    onPostDeleted: { type: Function as PropType<(postId: string) => void>, default: () => {}},
+    adminMode: { type: Boolean, default: true },
+    onPostDeleted: {
+      type: Function as PropType<(postId: string) => void>,
+      default: () => {}
+    }
   }
 });
 </script>
 
 <style scoped>
 .view-post {
+  position: relative;
   border-radius: 3px;
   border: 1px solid #ddd;
   background-color: #fafafa;
   display: flex;
+  cursor: pointer;
 }
 .post-content {
   flex-grow: 3;
@@ -48,9 +60,17 @@ export default Vue.extend({
   margin: 5px;
 }
 .delete-post-btn {
+  right: 0;
+  padding: 5px;
+  width: 30px;
+  position: absolute;
+  display: none;
   border: none;
   background: none;
   cursor: pointer;
   outline: none;
+}
+.view-post:hover .delete-post-btn {
+  display: block;
 }
 </style>

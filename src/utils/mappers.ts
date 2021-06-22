@@ -4,12 +4,13 @@ import DbParticipant from "../models/Participant";
 import ViewColumn from "../../client/models/Column";
 import ViewPost from "../../client/models/Post";
 import ViewParticipant from "../../client/models/Participant";
-import { keyBy } from "lodash";
+import { keyBy, sortBy } from "lodash";
 
 export function mapColumnsToView(
   columns: DbColumn[],
   posts: ViewPost[]
 ): ViewColumn[] {
+  posts = sortBy(posts, [({ submittedDate }) => submittedDate]);
   const postsByColumnId: Record<string, ViewPost[]> = {};
   for (const post of posts) {
     if (!postsByColumnId[post.columnId]) {
@@ -17,15 +18,16 @@ export function mapColumnsToView(
     }
     postsByColumnId[post.columnId].push(post);
   }
-  return columns
-    .map(dbColumn => ({
+  return sortBy(
+    columns.map(dbColumn => ({
       columnId: dbColumn.column_id,
       columnName: dbColumn.column_name,
       isOpen: dbColumn.is_open,
       posts: postsByColumnId[dbColumn.column_id] || [],
       createdDate: dbColumn.created_date
-    }))
-    .sort(({ createdDate: dateA }, { createdDate: dateB }) => dateA - dateB);
+    })),
+    [({ createdDate }) => createdDate]
+  );
 }
 
 export function mapPostsToView(
