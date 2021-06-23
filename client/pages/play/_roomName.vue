@@ -6,6 +6,7 @@
       <ViewColumns
         :columns="room.columns"
         :onPostSubmit="onPostSubmit"
+        :onPostDeleted="onPostDeleted"
         :adminMode="false"
       />
     </div>
@@ -111,6 +112,13 @@ export default Vue.extend({
         content
       };
       socketService.send(message);
+    },
+    onPostDeleted(postId: string) {
+      socketService.send({
+        type: MessageType.DELETE_POST,
+        roomName: this.room.roomName,
+        postId
+      });
     }
   }
 });
