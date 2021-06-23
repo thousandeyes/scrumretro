@@ -84,7 +84,6 @@ fieldset > input {
 
 .buttons {
   margin-top: 5px;
-  display: flex;
-  justify-content: space-between;
+  text-align: right;
 }
 </style>
