@@ -12,7 +12,7 @@ export default async function confluenceNotesSyncHandler(
   let { persistentId, username, token } = request;
   console.log(`adding confluence token for username ${username} to room with persistent id ${persistentId}`);
   if (persistentId == null) {
-    respondToWebsocket(client, event, {
+    await respondToWebsocket(client, event, {
       type: MessageType.ATLASSIAN_TOKEN_ADDED,
       result: false
     });
