@@ -58,14 +58,28 @@ async function syncConfluenceNotes(
 
   const now = new Date();
 
+  // Since we don't support action items currently set fake ones
+  const previousActionItems = [
+    { text: "Previous action item 1", complete: false, user: "ggeorgalis"},
+    { text: "Previous action item 2", complete: false, user: "ggeorgalis"},
+  ];
+
+  const actionItems = [
+    { text: "Add support for previous action items", complete: false, user: "ggeorgalis"},
+    { text: "Add JIRA integration", complete: false, user: "ggeorgalis"},
+    { text: "Add support for action items", complete: false, user: "fwieland"},
+    { text: "Improve the UI", complete: true, user: "rui"},
+    { text: "More lambdas!!1", complete: false, user: "sfreitas"},
+  ];
+
   const retroPage = formatRetroPageContent(
     now,
-    room.atlassian_username!,
+    room.atlassian_username!.split("@")[0],
     participants.map(p => p.participant_name),
-    [ { text: "foo", complete: false, user: "ggeorgalis"} ],
+    previousActionItems,
     columns.map(h => h.column_name),
     posts.map(i => i.map(j => j.content)),
-    [ { text: "foo new new", complete: false, user: "ggeorgalis"} ]
+    actionItems
   );
 
   let p = await findEndpointRetroPage(now, config);
