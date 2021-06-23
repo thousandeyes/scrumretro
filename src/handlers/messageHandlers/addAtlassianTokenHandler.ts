@@ -10,6 +10,7 @@ export default async function confluenceNotesSyncHandler(
   request: AtlassianTokenAddMessage
 ): Promise<APIGatewayProxyResult> {
   let { persistentId, username, token } = request;
+  console.log(`adding confluence token for username ${username} to room with persistent id ${persistentId}`);
   if (persistentId == null) {
     await respondToWebsocket(client, event, {
       type: MessageType.ATLASSIAN_TOKEN_ADDED,
@@ -35,11 +36,13 @@ async function addAtlassianToken(
 
   const room = await findRoomByPersistentId(persistentId);
   if (!room || username.length === 0 || token.length === 0) {
+    console.log(`error adding persistent token to room ${room?.room_name}`);
     return false;
   }
 
   room.atlassian_username = username;
   room.atlassian_token = token;
   await saveRoom(room);
+  console.log(`added token to room ${room.room_name}`);
   return true;
 }
