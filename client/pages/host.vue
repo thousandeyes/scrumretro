@@ -75,6 +75,8 @@ export default Vue.extend({
         case MessageType.ACTION_FAILED:
           this.$toasted.error(message.details, ERROR_OPTIONS);
           break;
+        case MessageType.SERVER_PONG:
+          break;
         default:
           console.warn("Unknown message received", { ...message });
           break;

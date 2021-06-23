@@ -85,6 +85,8 @@ export default Vue.extend({
         case MessageType.POST_DELETED:
           this.$store.commit(`room/${message.type}`, message);
           break;
+        case MessageType.SERVER_PONG:
+          break;
         case MessageType.ACTION_FAILED:
           this.$toasted.error(message.details, ERROR_OPTIONS);
           break;
