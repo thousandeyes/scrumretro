@@ -1,35 +1,38 @@
 <template>
-  <div v-if="!tokenExists">
-    <form @submit.prevent="addToken" novalidate>
-      <fieldset>
-      <!-- <label for="usernameInput">Username</label> -->
-      <input
-        v-model="username"
-        placeholder="Username"
-        type="text"
-        name="usernameInput"
-        id="usernameInput"
-      />
-      </fieldset>
+  <div class="add-atlassian-token">
+    <template v-if="!tokenExists">
+      <h3>Add Atlassian token</h3>
+      <form @submit.prevent="addToken" novalidate>
+        <fieldset>
+          <label for="usernameInput">Username</label>
+          <input
+            v-model="username"
+            placeholder="Username"
+            type="text"
+            name="usernameInput"
+            id="usernameInput"
+          />
+        </fieldset>
 
-      <fieldset>
-      <!-- <label for="tokenInput">Token</label> -->
-      <input
-        v-model="token"
-        placeholder="Token"
-        type="text"
-        name="tokenInput"
-        id="tokenInput"
-      />
-      </fieldset>
+        <fieldset>
+          <label for="tokenInput">Token</label>
+          <input
+            v-model="token"
+            placeholder="Token"
+            type="text"
+            name="tokenInput"
+            id="tokenInput"
+          />
+        </fieldset>
 
-      <div class="buttons">
-        <button type="submit">Add Token</button>
-      </div>
-    </form>
-  </div>
-  <div v-else class="badge-sm">
-    Token Added ✅
+        <div class="buttons">
+          <button type="submit">Add Token</button>
+        </div>
+      </form>
+    </template>
+    <template v-else>
+      <h3>Token Added ✅</h3>
+    </template>
   </div>
 </template>
 
@@ -61,9 +64,22 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-form {
-  display: flex;
-  height: 100%;
+.add-atlassian-token {
+  padding: 20px;
+}
+
+fieldset {
+  border: none;
+  min-height: 48px;
+  padding: 5px 0;
+}
+fieldset + fieldset {
+  margin-top: 5px;
+}
+fieldset > input {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
 }
 
 .buttons {
@@ -71,5 +87,4 @@ form {
   display: flex;
   justify-content: space-between;
 }
-
 </style>

@@ -7,7 +7,7 @@
         :columns="room.columns"
         :onPostSubmit="onPostSubmit"
         :adminMode="false"
-        />
+      />
     </div>
     <JoinRoom
       v-else
@@ -31,6 +31,7 @@ import {
   ServerMessage
 } from "../../../messages";
 import { ROOM_MODE } from "../../models/Room";
+import socketService from "../../lib/socketService";
 
 export default Vue.extend({
   components: { RoomDetails, ViewColumns, JoinRoom },
@@ -44,12 +45,14 @@ export default Vue.extend({
       stage: this.$config.stage,
       roomMode: ROOM_MODE.PLAYER
     });
-    this.socket = new WebSocket(this.$config.websocketUrl);
-    this.socket.onopen = () => this.socketOpened();
-    this.socket.onmessage = event => this.onSocketMessage(event);
+    socketService.connect(
+      this.$config.websocketUrl,
+      () => this.socketOpened(),
+      message => this.onSocketMessage(message)
+    );
   },
   beforeDestroy() {
-    this.socket.close();
+    socketService.close();
   },
   computed: {
     ...mapGetters({
@@ -67,8 +70,7 @@ export default Vue.extend({
     socketOpened() {
       this.connected();
     },
-    onSocketMessage(event: MessageEvent) {
-      const message: ServerMessage = JSON.parse(event.data);
+    onSocketMessage(message: ServerMessage) {
       if (message.type == null) {
         this.alertMsg = "Whoops! Something went wrong, please try again later.";
         return;
@@ -98,7 +100,7 @@ export default Vue.extend({
         roomName,
         persistentId: this.room.persistentId
       };
-      this.socket.send(JSON.stringify(message));
+      socketService.send(message);
     },
     onPostSubmit(columnId: string, content: string): void {
       const message: AddPostMessage = {
@@ -108,7 +110,7 @@ export default Vue.extend({
         columnId,
         content
       };
-      this.socket.send(JSON.stringify(message));
+      socketService.send(message);
     }
   }
 });

@@ -1,23 +1,26 @@
 <template>
-  <form @submit.prevent="sync" novalidate>
-    <textarea
-      placeholder="Additional Comment"
-      @input="valueChanged"
-      :value="value"
-    />
-    <div class="buttons">
-      <div class="confluence-page-url">
-        {{ state.confluencePageUrl }}
+  <div class="sync-notes">
+    <h3>Sync Notes to confluence</h3>
+    <form @submit.prevent="sync" novalidate>
+      <textarea
+        placeholder="Additional Comment"
+        @input="valueChanged"
+        :value="value"
+      />
+      <div class="buttons">
+        <div class="confluence-page-url">
+          {{ state.confluencePageUrl }}
+        </div>
+        <div class="message">
+          <small> {{ state.message }} </small>
+        </div>
+        <div class="errors">
+          <small> {{ error }} </small>
+        </div>
+        <button type="submit">Sync Notes</button>
       </div>
-      <div class="message">
-        <small> {{ state.message }} </small>
-      </div>
-      <div class="errors">
-        <small> {{ error }} </small>
-      </div>
-      <button type="submit">Sync Notes</button>
-    </div>
-  </form>
+    </form>
+  </div>
 </template>
 
 <script lang="ts">
@@ -52,15 +55,19 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.sync-notes {
+  padding: 20px;
+}
+
 form {
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 textarea {
   resize: none;
-  height: 100%;
+  height: 100px;
+  border: 1px solid #ddd;
 }
 
 .buttons {

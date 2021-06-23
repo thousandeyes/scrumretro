@@ -4,8 +4,8 @@
     <form v-else @submit.prevent="onEditToggled" novalidate>
       <input v-model="columnNameEditing" class="column-name-input" />
     </form>
-    <span class="column-admin-buttons">
-      <button v-if="adminMode" class="rename-button" @click="onEditToggled">
+    <span class="column-admin-buttons" v-if="adminMode">
+      <button class="rename-button" @click="onEditToggled">
         ✏️
       </button>
       <button @click="onOpenToggled">
@@ -25,7 +25,7 @@ import Column from "../models/Column";
 export default Vue.extend({
   props: {
     column: { type: Object as PropType<Column>, required: true },
-    adminMode: { type: Boolean, default: true },
+    adminMode: { type: Boolean, default: false },
     onColumnOpened: {
       type: Function as PropType<(columnId: string, isOpen: boolean) => void>,
       default: () => {}

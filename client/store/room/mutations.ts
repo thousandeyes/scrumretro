@@ -9,7 +9,7 @@ import {
   RoomJoinedMessage
 } from "../../../messages";
 import { keyBy } from "lodash";
-import Room, { ROOM_MODE } from "../../models/Room";
+import Room, { ROOM_MODE, Scenario } from "../../models/Room";
 import getDefaultState from "./state";
 
 const persistentStorageKeyMap: Record<ROOM_MODE, string> = {
@@ -36,6 +36,9 @@ export default {
   connected(state: Room) {
     state.connected = true;
   },
+  scenarioSet(state: Room, scenario: Scenario) {
+    state.scenario = scenario;
+  },
   resetPersistentId(state: Room) {
     removeStoredPersistentId(state.stage!, state.roomMode!);
     window.location.reload();
@@ -48,7 +51,7 @@ export default {
     storePersistentId(state.stage!, state.roomMode!, persistentId);
   },
   ROOM_JOINED(state: Room, { roomName, columns }: RoomJoinedMessage) {
-    Object.assign(state, { roomName, columns });
+    Object.assign(state, { joined: true, roomName, columns });
     const { roomMode } = state;
     if (roomMode === ROOM_MODE.PLAYER) {
       window.history.replaceState(

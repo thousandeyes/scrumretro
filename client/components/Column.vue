@@ -44,7 +44,7 @@ export default Vue.extend({
   components: { ColumnHeader, InputPost, ViewPost },
   props: {
     column: { type: Object as PropType<Column>, required: true },
-    adminMode: { type: Boolean, default: true },
+    adminMode: { type: Boolean, default: false },
     onPostSubmit: {
       type: Function as PropType<(columnId: string, content: string) => void>,
       default: () => {}
