@@ -34,8 +34,8 @@ async function addAtlassianToken(
 ): Promise<boolean> {
 
   const room = await findRoomByPersistentId(persistentId);
-  if (!room) {
-    return Promise.reject();
+  if (!room || username.length === 0 || token.length === 0) {
+    return false;
   }
 
   room.atlassian_username = username;

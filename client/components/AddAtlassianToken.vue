@@ -2,12 +2,17 @@
   <div class="add-atlassian-token">
     <template v-if="!tokenExists">
       <h3>Add Atlassian token</h3>
+      <p>
+        <a href="https://id.atlassian.com/manage-profile/security/api-tokens">
+          Generate an Atlassian token
+        </a>
+      </p>
       <form @submit.prevent="addToken" novalidate>
         <fieldset>
           <label for="usernameInput">Username</label>
           <input
             v-model="username"
-            placeholder="Username"
+            placeholder="E.g., username@thousandeyes.com"
             type="text"
             name="usernameInput"
             id="usernameInput"
@@ -18,8 +23,8 @@
           <label for="tokenInput">Token</label>
           <input
             v-model="token"
-            placeholder="Token"
-            type="text"
+            placeholder="Generated Atlassian Token"
+            type="password"
             name="tokenInput"
             id="tokenInput"
           />
