@@ -24,6 +24,8 @@ export enum MessageType {
   DELETE_COLUMN = "DELETE_COLUMN",
   DELETE_POST = "DELETE_POST",
   POST_DELETED = "POST_DELETED",
+  CLIENT_PING = "CLIENT_PING",
+  SERVER_PONG = "SERVER_PONG",
 }
 
 export type ClientMessage =
@@ -36,7 +38,8 @@ export type ClientMessage =
   | ChangeColumnOpenStateMessage
   | ChangeColumnNameMessage
   | DeleteColumnMessage
-  | DeletePostMessage;
+  | DeletePostMessage
+  | ClientPingMessage;
 
 export type ServerMessage =
   | PersistentIdGeneratedMessage
@@ -51,7 +54,8 @@ export type ServerMessage =
   | PostAddedMessage
   | ColumnOpenStateChangedMessage
   | ColumnNameChangedMessage
-  | PostDeletedMessage;
+  | PostDeletedMessage
+  | ServerPongMessage;
 
 export interface ScrumMasterLoginMessage {
   type: MessageType.SCRUM_MASTER_LOGIN;
@@ -188,4 +192,12 @@ export interface DeletePostMessage {
 export interface PostDeletedMessage {
   type: MessageType.POST_DELETED;
   postId: string;
+}
+
+export interface ClientPingMessage {
+  type: MessageType.CLIENT_PING;
+}
+
+export interface ServerPongMessage {
+  type: MessageType.SERVER_PONG;
 }

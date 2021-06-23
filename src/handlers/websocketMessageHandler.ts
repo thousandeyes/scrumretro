@@ -25,6 +25,12 @@ const MessageHandlers: Record<ClientMessage["type"], MessageHandlerFn> = {
   CHANGE_COLUMN_NAME: changeColumnNameHandler,
   DELETE_COLUMN: deleteColumnHandler,
   DELETE_POST: deletePostHandler,
+  async CLIENT_PING(client, event) {
+    await respondToWebsocket(client, event, {
+      type: MessageType.SERVER_PONG
+    });
+    return { statusCode: 200, body: 'handled' };
+  }
 };
 
 export default async function(

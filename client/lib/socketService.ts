@@ -1,6 +1,9 @@
-import { ClientMessage, ServerMessage } from "../../messages";
+import { ClientMessage, MessageType, ServerMessage } from "../../messages";
+
+const PING_INTERVAL_MS = 10000;
 
 let socket: WebSocket | null = null;
+let pingIntervalId: any | null = null;
 
 export default {
   connect,
@@ -27,6 +30,8 @@ function connect(
   socket.onmessage = event => {
     onmessage(JSON.parse(event.data));
   };
+
+  pingIntervalId = setInterval(sendPing, PING_INTERVAL_MS);
 }
 
 function close() {
@@ -34,7 +39,12 @@ function close() {
     socket.close();
   }
 
+  if (pingIntervalId != null) {
+    clearInterval(pingIntervalId);
+  }
+
   socket = null;
+  pingIntervalId = null;
 }
 
 function checkSocket(socket: WebSocket | null): socket is WebSocket {
@@ -42,4 +52,12 @@ function checkSocket(socket: WebSocket | null): socket is WebSocket {
     throw new Error("Socket was not initialized");
   }
   return true;
+}
+
+function sendPing() {
+  if (socket) {
+    send({
+      type: MessageType.CLIENT_PING
+    });
+  }
 }
