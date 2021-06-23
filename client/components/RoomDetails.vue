@@ -7,7 +7,9 @@
     </span>
 
     <span class="room-details">
-      <span class="label">ROOM:</span> {{ room.roomName || "-" }}
+      <template v-if="room.roomName">
+        <span class="label">ROOM:</span> {{ room.roomName || "-" }}
+      </template>
     </span>
 
     <span class="room-details">
