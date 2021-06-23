@@ -1,6 +1,11 @@
 <template>
   <div class="top-bar">
-    <span class="room-details"></span>
+    <span class="room-details">
+      <template v-if="adminMode">
+        <ScenarioSelector :value="room.scenario" :onChange="scenarioSet" />
+      </template>
+    </span>
+
     <span class="room-details">
       <span class="label">ROOM:</span> {{ room.roomName || "-" }}
     </span>
@@ -20,18 +25,21 @@
 import Vue, { PropType } from "vue";
 import { mapMutations } from "vuex";
 import Room from "../models/Room";
+import ScenarioSelector from "./ScenarioSelector.vue";
 
 export default Vue.extend({
+  components: { ScenarioSelector },
   props: {
     room: {
       type: Object as PropType<Room>,
       required: true
-    }
+    },
+    adminMode: { type: Boolean, default: false }
   },
-
   methods: {
     ...mapMutations({
-      resetPersistentId: "room/resetPersistentId"
+      resetPersistentId: "room/resetPersistentId",
+      scenarioSet: "room/scenarioSet"
     })
   }
 });

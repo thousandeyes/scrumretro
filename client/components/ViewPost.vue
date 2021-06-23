@@ -26,7 +26,7 @@ export default Vue.extend({
   props: {
     post: { type: Object as PropType<Post> },
     masked: { type: Boolean, default: false },
-    adminMode: { type: Boolean, default: true },
+    adminMode: { type: Boolean, default: false },
     onPostDeleted: {
       type: Function as PropType<(postId: string) => void>,
       default: () => {}
