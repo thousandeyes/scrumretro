@@ -1,8 +1,12 @@
 import axios from 'axios';
+import { flatten } from "lodash";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ApiGatewayManagementApi } from "aws-sdk";
 import { ConfluenceNotesSyncMessage, MessageType } from "../../../messages";
 import { findRoomByPersistentId } from "../../db/rooms";
+import { findColumnsByRoomName } from "../../db/columns";
+import { findParticipantsByRoomName } from "../../db/participants";
+import { findPostsByColumnId } from "../../db/posts";
 import { respondToWebsocket } from "../../utils/websockets";
 
 export default async function confluenceNotesSyncHandler(
@@ -37,6 +41,10 @@ async function syncConfluenceNotes(
     return Promise.reject();
   }
 
+  const columns = await findColumnsByRoomName(room.room_name);
+  const posts = await Promise.all(columns.map(({ column_id }) => findPostsByColumnId(column_id)));
+  const participants = await findParticipantsByRoomName(room.room_name);
+
   const config: Config = {
     baseURL: 'https://thousandeyes.atlassian.net/wiki',
     headers: {
@@ -52,11 +60,11 @@ async function syncConfluenceNotes(
 
   const retroPage = formatRetroPageContent(
     now,
-    "ggeorgalis",
-    ["ggeorgalis", "ftw", "ftw2"],
+    room.atlassian_username!,
+    participants.map(p => p.participant_name),
     [ { text: "foo", complete: false, user: "ggeorgalis"} ],
-    [ "Bad", "Well", "Notes" ],
-    [ [ "One bad thing", "one good thing", "one note thing" ] ],
+    columns.map(h => h.column_name),
+    posts.map(i => i.map(j => j.content)),
     [ { text: "foo new new", complete: false, user: "ggeorgalis"} ]
   );
 
@@ -241,17 +249,34 @@ function formatRetroTableRow(items: Array<string>) : string {
 
 }
 
-function formatRetroTableRows(rows: Array<Array<string>>, columns: number) : string {
-  return rows.reduce((r, i) => formatRetroTableRow(i), '');
+function formatRetroTableRows(columns: Array<Array<string>>) : string {
+  const getRow = (row) => {
+    let res : Array<string> = [];
+    for (let col = 0; col < columns.length; ++col) {
+      res.push(columns[col][row]);
+    }
+    return res;
+  };
+
+  let maxRowLength : number = 0;
+  for (let col = 0; col < columns.length; ++col) {
+    maxRowLength = Math.max(maxRowLength, columns[col].length);
+  }
+
+  let result = '';
+  for (let row = 0; row < maxRowLength; ++row) {
+    result += formatRetroTableRow(getRow(row));
+  }
+  return result;
 }
 
 function formatRetroPageContent(date: Date,
-                              scrummaster: string,
-                              participants: Array<string>,
-                              previousActionItems: Array<ActionItem>,
-                              retroColumns: Array<string>,
-                              retroRows: Array<Array<string>>,
-                              actionItems: Array<ActionItem>) : string {
+                                scrummaster: string,
+                                participants: Array<string>,
+                                previousActionItems: Array<ActionItem>,
+                                retroColumnNames: Array<string>,
+                                retroColumns: Array<Array<string>>,
+                                actionItems: Array<ActionItem>) : string {
   return `
   <ac:structured-macro ac:name="details" ac:schema-version="1" data-layout="full-width" ac:macro-id="95336a1f-af29-4faa-b356-15c8fa100ff8">
   <ac:rich-text-body>
@@ -320,8 +345,8 @@ function formatRetroPageContent(date: Date,
           <col style="width: 288.0px;" />
       </colgroup>
       <tbody>
-          ${formatRetroTableHeader(retroColumns)}
-          ${formatRetroTableRows(retroRows, retroColumns.length)}
+          ${formatRetroTableHeader(retroColumnNames)}
+          ${formatRetroTableRows(retroColumns)}
       </tbody>
   </table>
 
