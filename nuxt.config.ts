@@ -16,7 +16,7 @@ export default {
 
   srcDir: "client/",
 
-  modules: ["@nuxt/http"],
+  modules: ["@nuxt/http", "@nuxtjs/toast"],
   buildModules: ["@nuxt/typescript-build"],
 
   render: {

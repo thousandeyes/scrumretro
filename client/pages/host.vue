@@ -20,6 +20,8 @@ import { ROOM_MODE } from "../models/Room";
 import HostScenarios from "../components/HostScenarios.vue";
 import socketService from "../lib/socketService";
 
+const ERROR_OPTIONS = { duration: 10000 };
+
 export default Vue.extend({
   components: {
     RoomDetails,
@@ -69,6 +71,9 @@ export default Vue.extend({
         case MessageType.CONFLUENCE_NOTES_SYNCED:
         case MessageType.ATLASSIAN_TOKEN_ADDED:
           this.$store.commit(`syncNotes/${message.type}`, message);
+          break;
+        case MessageType.ACTION_FAILED:
+          this.$toasted.error(message.details, ERROR_OPTIONS);
           break;
         default:
           console.warn("Unknown message received", { ...message });

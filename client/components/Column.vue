@@ -90,7 +90,7 @@ export default Vue.extend({
 }
 
 .column-container {
-  padding-top: calc(10px / 2);
+  padding: calc(10px / 2) 0;
   height: 100%;
   border-radius: 3px;
   border: 1px solid #ddd;

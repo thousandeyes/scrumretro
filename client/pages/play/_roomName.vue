@@ -1,7 +1,6 @@
 <template>
   <div class="player-view">
     <RoomDetails :room="room" />
-    <div v-if="alertMsg" class="alert">{{ alertMsg }}</div>
     <div v-if="room.roomName != null" class="play">
       <ViewColumns
         :columns="room.columns"
@@ -34,13 +33,10 @@ import {
 import { ROOM_MODE } from "../../models/Room";
 import socketService from "../../lib/socketService";
 
+const ERROR_OPTIONS = { duration: 10000 };
+
 export default Vue.extend({
   components: { RoomDetails, ViewColumns, JoinRoom },
-  data(): State {
-    return {
-      alertMsg: undefined
-    };
-  },
   mounted() {
     this.initRoomState({
       stage: this.$config.stage,
@@ -73,7 +69,10 @@ export default Vue.extend({
     },
     onSocketMessage(message: ServerMessage) {
       if (message.type == null) {
-        this.alertMsg = "Whoops! Something went wrong, please try again later.";
+        this.$toasted.error(
+          "Whoops! Something went wrong, please try again later.",
+          ERROR_OPTIONS
+        );
         return;
       }
       switch (message.type) {
@@ -87,7 +86,7 @@ export default Vue.extend({
           this.$store.commit(`room/${message.type}`, message);
           break;
         case MessageType.ACTION_FAILED:
-          this.alertMsg = message.details;
+          this.$toasted.error(message.details, ERROR_OPTIONS);
           break;
       }
     },
@@ -122,10 +121,6 @@ export default Vue.extend({
     }
   }
 });
-
-interface State {
-  alertMsg?: string;
-}
 </script>
 
 <style scoped>
@@ -135,10 +130,5 @@ interface State {
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-}
-.alert {
-  color: #cc0808;
-  border: 1px solid #cc0808;
-  padding: 15px 10px;
 }
 </style>
