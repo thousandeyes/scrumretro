@@ -1,19 +1,22 @@
 <template>
   <div class="player-view">
     <RoomDetails :room="room" />
-    <div v-if="room.roomName != null" class="play">
-      <ViewColumns
-        :columns="room.columns"
-        :onPostSubmit="onPostSubmit"
-        :onPostDeleted="onPostDeleted"
-        :adminMode="false"
-      />
-    </div>
     <JoinRoom
-      v-else
+      v-if="joinRoomForm"
       :roomNameParam="roomNameParam"
       :onJoinRoomClick="onJoinRoomClick"
     />
+    <div v-else class="play">
+      <template v-if="room.joined">
+        <ViewColumns
+          :columns="room.columns"
+          :onPostSubmit="onPostSubmit"
+          :onPostDeleted="onPostDeleted"
+          :adminMode="false"
+        />
+      </template>
+      <h3 v-else>Joining room...</h3>
+    </div>
   </div>
 </template>
 
@@ -37,6 +40,9 @@ const ERROR_OPTIONS = { duration: 10000 };
 
 export default Vue.extend({
   components: { RoomDetails, ViewColumns, JoinRoom },
+  data(): { joinRoomForm: boolean } {
+    return { joinRoomForm: true };
+  },
   mounted() {
     this.initRoomState({
       stage: this.$config.stage,
@@ -103,6 +109,7 @@ export default Vue.extend({
         persistentId: this.room.persistentId
       };
       socketService.send(message);
+      this.joinRoomForm = false;
     },
     onPostSubmit(columnId: string, content: string): void {
       const message: AddPostMessage = {
@@ -132,5 +139,9 @@ export default Vue.extend({
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+}
+
+h3 {
+  text-align: center;
 }
 </style>
