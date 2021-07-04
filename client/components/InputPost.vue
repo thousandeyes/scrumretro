@@ -18,6 +18,13 @@
 import Vue, { PropType } from "vue";
 
 export default Vue.extend({
+  created() {
+    window.addEventListener("keydown", this.controlEnterListener);
+  },
+  // make sure you remove the listener when the component is no longer visible
+  destroyed() {
+    window.removeEventListener("keydown", this.controlEnterListener);
+  },
   props: {
     onPost: {
       type: Function as PropType<(value: string) => void>,
@@ -40,6 +47,11 @@ export default Vue.extend({
     valueChanged({ target }: { target: HTMLTextAreaElement }) {
       this.value = target.value;
       this.error = null;
+    },
+    controlEnterListener(event: KeyboardEvent) {
+      if (event.key === "Enter" && event.ctrlKey) {
+        this.post()
+      }
     }
   }
 });
