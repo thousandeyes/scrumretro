@@ -6,6 +6,9 @@ A retrospective tool
 
 ### Setup:
 
+Note that if you are using the same machine you use for regular TE development, you will need to
+connect to the Global Protect VPN for NPM to work correctly.
+
 ```
 $ npm install -g serverless
 $ npm ci
