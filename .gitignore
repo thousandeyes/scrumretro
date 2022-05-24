@@ -9,3 +9,5 @@ jspm_packages
 
 dist
 .nuxt
+
+.DS_Store

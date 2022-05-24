@@ -3,6 +3,11 @@
     <h1>🃏 lol scrum retro</h1>
     <nuxt-link to="/play">Play</nuxt-link>
     <nuxt-link to="/host">Host Game</nuxt-link>
+    <p>
+      Made by <a href="https://www.thousandeyes.com/" target="_blank">ThousandEyes</a> (part of Cisco)
+      | Licenced under <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank">AGPLv3</a>
+      | <a href="https://github.com/thousandeyes/scrumretro" target="_blank">Source on GitHub</a>
+    </p>
   </div>
 </template>
 
