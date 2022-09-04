@@ -17,6 +17,7 @@ import { MessageType } from "../../../messages";
 import socketService from "../../lib/socketService";
 import AddAtlassianToken from "../AddAtlassianToken.vue";
 import SyncNotes from "../SyncNotes.vue";
+import{ Team } from "../../models/SyncNotesState";
 
 export default Vue.extend({
   components: { SyncNotes, AddAtlassianToken },
@@ -27,10 +28,13 @@ export default Vue.extend({
     })
   },
   methods: {
-    onSyncNotes() {
+    onSyncNotes(message: string, team: Team) {
+      console.log(`sending value: ${message} ${team}`);
       socketService.send({
         type: MessageType.CONFLUENCE_NOTES_SYNC,
-        persistentId: this.room.persistentId
+        persistentId: this.room.persistentId,
+        message,
+        team
       });
     },
     onAddAtlassianToken(username: string, token: string) {

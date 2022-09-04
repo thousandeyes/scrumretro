@@ -1,5 +1,6 @@
 import Column from "./client/models/Column";
 import Post from "./client/models/Post";
+import { Team } from "./client/models/SyncNotesState";
 
 export enum MessageType {
   PARTICIPANT_LOGIN = "PARTICIPANT_LOGIN",
@@ -130,6 +131,8 @@ export interface AtlassianTokenAddedMessage {
 export interface ConfluenceNotesSyncMessage {
   type: MessageType.CONFLUENCE_NOTES_SYNC;
   persistentId?: string;
+  message?: string;
+  team?: Team;
 }
 
 export interface ConfluenceNotesSyncedMessage {
