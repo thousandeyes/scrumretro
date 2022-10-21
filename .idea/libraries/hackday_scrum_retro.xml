@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="hackday-scrum-retro">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/.serverless/hackday-scrum-retro.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
