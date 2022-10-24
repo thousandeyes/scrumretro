@@ -13,12 +13,11 @@
 # limitations under the License.
 
 service: hackday-scrum-retro
-frameworkVersion: "2"
+frameworkVersion: "3"
 
 plugins:
   - serverless-s3-sync
   - serverless-domain-manager
-  - serverless-apigw-binary
   - serverless-plugin-common-excludes
 
 provider:
@@ -26,24 +25,34 @@ provider:
   runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
   region: eu-west-2
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - !GetAtt DynamoDbRoomsTable.Arn
-        - !Join ["/", [!GetAtt DynamoDbRoomsTable.Arn, "index", "*"]]
-        - !GetAtt DynamoDbColumnsTable.Arn
-        - !Join ["/", [!GetAtt DynamoDbColumnsTable.Arn, "index", "*"]]
-        - !GetAtt DynamoDbPostsTable.Arn
-        - !Join ["/", [!GetAtt DynamoDbPostsTable.Arn, "index", "*"]]
-        - !GetAtt DynamoDbParticipantsTable.Arn
-        - !Join ["/", [!GetAtt DynamoDbParticipantsTable.Arn, "index", "*"]]
+  apiGateway:
+    binaryMediaTypes: ['*/*']
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - !GetAtt DynamoDbRoomsTable.Arn
+            - !Join ["/", [!GetAtt DynamoDbRoomsTable.Arn, "index", "*"]]
+            - !GetAtt DynamoDbColumnsTable.Arn
+            - !Join ["/", [!GetAtt DynamoDbColumnsTable.Arn, "index", "*"]]
+            - !GetAtt DynamoDbPostsTable.Arn
+            - !Join ["/", [!GetAtt DynamoDbPostsTable.Arn, "index", "*"]]
+            - !GetAtt DynamoDbParticipantsTable.Arn
+            - !Join ["/", [!GetAtt DynamoDbParticipantsTable.Arn, "index", "*"]]
+        - Effect: Allow
+          Action:
+            - s3:Get*
+            - s3:List*
+          Resource:
+            - !Join ["", ["arn:aws:s3:::", { Ref: "ClientAssetsBucket" }, "/*"]]
   logs:
     websocket: false
   environment:
@@ -89,9 +98,6 @@ custom:
     certificateName: "scrumretro.lol"
     stage: ${self:provider.stage}
     createRoute53Record: true
-  apigwBinary:
-    types:
-      - "*/*"
 
 package:
   excludeDevDependencies: true
@@ -122,18 +128,33 @@ functions:
     events:
       - http: ANY /
       - http: ANY /{proxy+}
-      - http:
-          path: /_nuxt/{proxy+}
-          method: ANY
-          integration: http-proxy
-          request:
-            uri: https://${self:custom.buckets.ASSETS_BUCKET_NAME}.s3.${self:provider.region}.amazonaws.com/{proxy}
-            parameters:
-              paths:
-                proxy: true
 
 resources:
   Resources:
+    ClientAssetsRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - apigateway.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: "scrumretro-${self:provider.stage}-assets"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:Get*
+                    - s3:List*
+                  Resource:
+                    - !Join ["", ["arn:aws:s3:::", { Ref: "ClientAssetsBucket" }, "/*"]]
     ClientAssetsBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -155,29 +176,100 @@ resources:
                 - x-amz-server-side-encryption
                 - x-amz-request-id
                 - x-amz-id-2
-    ClientAssetsBucketPolicy:
-      Type: AWS::S3::BucketPolicy
+    UnderscoreNuxtResource:
+      Type: AWS::ApiGateway::Resource
       Properties:
-        Bucket:
-          Ref: ClientAssetsBucket
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            [
-              {
-                Action: ["s3:GetObject"],
-                Effect: "Allow",
-                Resource:
-                  {
-                    Fn::Join:
-                      [
-                        "",
-                        ["arn:aws:s3:::", { Ref: "ClientAssetsBucket" }, "/*"],
-                      ],
-                  },
-                Principal: "*",
-              },
-            ]
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ParentId:
+          Fn::GetAtt:
+            - ApiGatewayRestApi
+            - "RootResourceId"
+        PathPart: _nuxt
+    ClientAssetsProxyResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ParentId:
+          Ref: UnderscoreNuxtResource
+        PathPart: "{proxy+}"
+    s3ProxyGetMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        HttpMethod: GET
+        ApiKeyRequired: false
+        AuthorizationType: NONE
+        ResourceId:
+          Ref: ClientAssetsProxyResource
+        Integration:
+          Type: AWS
+          IntegrationHttpMethod: GET
+          Credentials: !GetAtt ["ClientAssetsRole", "Arn"]
+          Uri: arn:aws:apigateway:${self:provider.region}:s3:path/${self:custom.buckets.ASSETS_BUCKET_NAME}/{proxy}
+          RequestParameters:
+            integration.request.header.Content-Type: method.request.header.Content-Type
+            integration.request.header.x-amz-acl: "'authenticated-read'"
+            integration.request.header.Expect: "'100-continue'"
+            integration.request.path.proxy: method.request.path.proxy
+          PassthroughBehavior: WHEN_NO_MATCH
+          IntegrationResponses:
+            - StatusCode: 200
+              ResponseParameters:
+                method.response.header.Timestamp: integration.response.header.Date
+                method.response.header.Content-Type: integration.response.header.Content-Type
+                method.response.header.Content-Disposition: integration.response.header.Content-Disposition
+            - StatusCode: 400
+              SelectionPattern: "400"
+              ResponseParameters:
+                method.response.header.Content-Type: integration.response.header.Content-Type
+                method.response.header.Content-Disposition: integration.response.header.Content-Disposition
+            - StatusCode: 404
+              SelectionPattern: "404"
+              ResponseParameters:
+                method.response.header.Content-Type: integration.response.header.Content-Type
+                method.response.header.Content-Disposition: integration.response.header.Content-Disposition
+            - StatusCode: 500
+              SelectionPattern: '5\d{2}'
+              ResponseParameters:
+                method.response.header.Content-Type: integration.response.header.Content-Type
+                method.response.header.Content-Disposition: integration.response.header.Content-Disposition
+        MethodResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Timestamp: integration.response.header.Date
+              method.response.header.Content-Type: integration.response.header.Content-Type
+              method.response.header.Content-Disposition: integration.response.header.Content-Disposition
+          - StatusCode: 400
+            ResponseParameters:
+              method.response.header.Content-Type: integration.response.header.Content-Type
+              method.response.header.Content-Disposition: integration.response.header.Content-Disposition
+          - StatusCode: 404
+            ResponseParameters:
+              method.response.header.Content-Type: integration.response.header.Content-Type
+              method.response.header.Content-Disposition: integration.response.header.Content-Disposition
+          - StatusCode: 500
+            ResponseParameters:
+              method.response.header.Content-Type: integration.response.header.Content-Type
+              method.response.header.Content-Disposition: integration.response.header.Content-Disposition
+        RequestParameters:
+          method.request.header.Timestamp: false
+          method.request.header.Content-Disposition: false
+          method.request.header.Content-Type: false
+          method.request.header.x-amz-acl: false
+          method.request.path.proxy: false
+    ApiGatewayDeploymentFinal:
+      Type: AWS::ApiGateway::Deployment
+      Properties:
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        StageName: ${self:provider.stage}
+      DependsOn:
+        - ApiGatewayMethodAny
+        - ApiGatewayMethodProxyVarAny
+        - s3ProxyGetMethod
     DynamoDbRoomsTable:
       Type: "AWS::DynamoDB::Table"
       DeletionPolicy: Delete
