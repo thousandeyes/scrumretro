@@ -50,7 +50,6 @@
     "cross-env": "^7.0.3",
     "serverless": "^3.23.0",
     "serverless-api-cloudfront": "^0.9.5",
-    "serverless-apigw-binary": "git+https://github.com/FLamparski/serverless-apigw-binary.git",
     "serverless-domain-manager": "^5.1.0",
     "serverless-plugin-common-excludes": "^3.0.1",
     "serverless-plugin-include-dependencies": "^4.1.0",
