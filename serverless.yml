@@ -47,12 +47,6 @@ provider:
             - !Join ["/", [!GetAtt DynamoDbPostsTable.Arn, "index", "*"]]
             - !GetAtt DynamoDbParticipantsTable.Arn
             - !Join ["/", [!GetAtt DynamoDbParticipantsTable.Arn, "index", "*"]]
-        - Effect: Allow
-          Action:
-            - s3:Get*
-            - s3:List*
-          Resource:
-            - !Join ["", ["arn:aws:s3:::", { Ref: "ClientAssetsBucket" }, "/*"]]
   logs:
     websocket: false
   environment:
@@ -140,7 +134,6 @@ resources:
             - Effect: Allow
               Principal:
                 Service:
-                  - lambda.amazonaws.com
                   - apigateway.amazonaws.com
               Action:
                 - sts:AssumeRole
